@@ -3,20 +3,26 @@ package pl.filipgrela.ledcontroller;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.widget.EditText;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
 
 import pl.filipgrela.ledcontroller.comunication.RaspberryClient;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 public class MainActivity extends AppCompatActivity {
     private String TAG = "MainActivity";
@@ -67,7 +73,11 @@ public class MainActivity extends AppCompatActivity {
         vSeekBar.setProgress((int) (vValue));
 
         updadeLEDColor();
+        setupSeekBars();
+        setupEditText();
+    }
 
+    private void setupSeekBars(){
         hSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -127,7 +137,92 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
 
+    private void setupEditText(){
+        hSeekBarValue.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if(s == null || !s.toString().isEmpty()) {
+                    double value = Double.parseDouble(String.valueOf(s));
+                    if(value > 360){
+                        makeToast("Max value for H is 360");
+                        hSeekBarValue.setText("360");
+                    }else if(value < 0){
+                        makeToast("Min value for H is 0");
+                        hSeekBarValue.setText("0");
+                    }else{
+                        hValue = value;
+                        updadeLEDColor();
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        sSeekBarValue.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if(s == null || !s.toString().isEmpty()) {
+                    double value = Double.parseDouble(String.valueOf(s));
+                    if(value > 100){
+                        makeToast("Max value for S is 100");
+                        sSeekBarValue.setText("100");
+                    }else if(value < 0){
+                        makeToast("Min value for H is 0");
+                        sSeekBarValue.setText("0");
+                    }else{
+                        sValue = value;
+                        updadeLEDColor();
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        vSeekBarValue.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if(s == null || !s.toString().isEmpty()) {
+                    double value = Double.parseDouble(String.valueOf(s));
+                    if(value > 100){
+                        makeToast("Max value for H is 100");
+                        vSeekBarValue.setText("100");
+                    }else if(value < 0){
+                        makeToast("Min value for H is 0");
+                        vSeekBarValue.setText("0");
+                    }else{
+                        vValue = value;
+                        updadeLEDColor();
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
     }
 
     public void vibrate(int timeImMs){
@@ -156,7 +251,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         thread.start();
+    }
 
+    @SuppressLint("ShowToast")
+    private void makeToast(String msg){
+        Toast.makeText(getApplicationContext(), msg, LENGTH_LONG).show();
     }
 
 }
