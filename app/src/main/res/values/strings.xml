@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Led controller</string>
+    <string name="pref_title">Color picker</string>
+</resources>
