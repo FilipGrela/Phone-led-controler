@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 
@@ -11,8 +12,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+
+import pl.filipgrela.ledcontroller.MainActivity;
 
 public class RaspberryClient {
 
@@ -31,69 +35,72 @@ public class RaspberryClient {
 
     private Context context;
 
-    public void startConnection(Context context) throws IOException {
-        Log.d(TAG, "Starting connection dealt settings");
-        pref = context.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+    public PrintWriter startConnection(Context context) throws IOException {
+        Log.d(TAG, "Starting connection default settings");
 
-        startConnection(context,
-                pref.getString("Server_IP", DEFAULT_IP),
-                pref.getInt("Server_port", DEFAULT_PORT));
+        return startConnection(context,
+                getPrefServerIp(context),
+                getPrefServerPort(context));
     }
 
-    public void startConnection(Context context, String ip , int port) {
+    public PrintWriter startConnection(Context context, String ip , int port) {
         this.context = context;
+        out = null;
 
-        pref = context.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
-        editor = pref.edit();
+        if (isHostIsReachable(context, ip)) {
+            pref = context.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+            editor = pref.edit();
 
-        Log.d(TAG, "Starting connection on : " + ip + ":" + port);
+            Log.d(TAG, "Starting connection on : " + ip + ":" + port);
 
-        try {
-            clientSocket = new Socket(ip, port);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        Log.d(TAG, "Connected");
-        try {
-            out = new PrintWriter(clientSocket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    public void sendMessage(String msg) {
-        Log.d(TAG, "Message send.");
-
-        byte[] bytes = msg.getBytes(StandardCharsets.UTF_8);
-        String utf8EncodedMessage = new String(bytes, StandardCharsets.UTF_8);
-        int msgLength = utf8EncodedMessage.length();
-
-        bytes = String.valueOf(msgLength).getBytes(StandardCharsets.UTF_8);
-        String utf8EncodedMessageLength = new String(bytes, StandardCharsets.UTF_8);
-        String msgLengthToSend = utf8EncodedMessageLength;
-
-        msgLengthToSend = String.format("%-" + HEADER + "s", msgLengthToSend);
-
-        out.print(msgLengthToSend);
-        Log.d(TAG, "Msg leinht: '" + msgLengthToSend + "'");
-        out.flush();
-        out.print(msg);
-        Log.d(TAG, msg);
-        out.flush();
-        if(!msg.equals("!DISCONNECT")){
-            sendMessage("!DISCONNECT");
-        }else if (msg.equals("!DISCONNECT")){
             try {
-                stopConnection();
+                clientSocket = new Socket(ip, port);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Log.d(TAG, "Connected");
+            try {
+                out = new PrintWriter(clientSocket.getOutputStream(), true);
+                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        return out;
     }
 
-    public void stopConnection() throws IOException {
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+    public void sendMessage(Context context, PrintWriter out, String msg) {
+        this.context = context;
+        if (isHostIsReachable(context, getPrefServerIp(context)) && out != null) {
+            Log.d(TAG, "Message send.");
+
+            byte[] bytes = msg.getBytes(StandardCharsets.UTF_8);
+            String utf8EncodedMessage = new String(bytes, StandardCharsets.UTF_8);
+            int msgLength = utf8EncodedMessage.length();
+
+            bytes = String.valueOf(msgLength).getBytes(StandardCharsets.UTF_8);
+            String msgLengthToSend = new String(bytes, StandardCharsets.UTF_8);
+
+            msgLengthToSend = String.format("%-" + HEADER + "s", msgLengthToSend);
+
+            out.print(msgLengthToSend);
+            Log.d(TAG, "Msg leinht: '" + msgLengthToSend + "'");
+            out.flush();
+            out.print(msg);
+            Log.d(TAG, msg);
+            out.flush();
+            if (msg.equals("!DISCONNECT")) {
+                try {
+                    stopConnection(out);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void stopConnection(PrintWriter out) throws IOException {
         in.close();
         out.close();
         clientSocket.close();
@@ -107,6 +114,32 @@ public class RaspberryClient {
         editor.putString("Server_IP", ip);
         editor.putInt("Server_port", port);
         editor.apply();
+    }
+
+    private boolean isHostIsReachable(Context context, String ip){
+        boolean reachable = false;
+        try {
+            InetAddress address = InetAddress.getByName(ip);
+            reachable = address.isReachable(15);
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+
+        return reachable;
+    }
+
+    public String getPrefServerIp(Context context){
+        this.context = context;
+        pref = context.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+
+        return pref.getString("Server_IP", DEFAULT_IP);
+    }
+
+    public int getPrefServerPort(Context context){
+        this.context = context;
+        pref = context.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
+
+        return pref.getInt("Server_port", DEFAULT_PORT);
     }
 
     //TODO Zrobić wysyłanie wiadomości wyłaczającej program na rpi oraz rpi (EXIT_MSG = "Az!DaKYJ,2LvN=]s{R@];4))#Aj-hub<tuP4D+^S8RN,Yb+r_+")

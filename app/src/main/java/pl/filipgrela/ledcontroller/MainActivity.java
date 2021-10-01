@@ -1,10 +1,16 @@
 package pl.filipgrela.ledcontroller;
 
 import androidx.annotation.RequiresApi;
+import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceScreen;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,25 +19,35 @@ import android.os.Vibrator;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.DecimalFormat;
 
 import pl.filipgrela.ledcontroller.comunication.RaspberryClient;
+import pl.filipgrela.ledcontroller.settings.SettingsActivity;
+import pl.filipgrela.ledcontroller.settings.SettingsFragment;
 
 import static android.widget.Toast.LENGTH_LONG;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements
+        PreferenceFragmentCompat.OnPreferenceStartScreenCallback {
     private String TAG = "MainActivity";
+
+    SettingsActivity settingsActivity;
 
     private Vibrator vibrator;
 
     private RaspberryClient raspberryClient;
 
     private DecimalFormat df = new DecimalFormat("#.#");
+
+    private Thread threadConnection;
 
     private EditText hSeekBarValue;
     private EditText sSeekBarValue;
@@ -40,6 +56,10 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar hSeekBar;
     private SeekBar sSeekBar;
     private SeekBar vSeekBar;
+
+    private boolean isHSeekBarTouched = false;
+    private boolean isSSeekBarTouched = false;
+    private boolean isVSeekBarTouched = false;
 
     private double hValue = 180;
     private double sValue = 100;
@@ -50,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        settingsActivity = new SettingsActivity();
 
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
@@ -72,7 +94,19 @@ public class MainActivity extends AppCompatActivity {
         sSeekBar.setProgress((int) (sValue));
         vSeekBar.setProgress((int) (vValue));
 
-        updadeLEDColor();
+//        if (savedInstanceState == null) {
+//            // Create the fragment only when the activity is created for the first time.
+//            // ie. not after orientation changes
+//            Fragment fragment = getSupportFragmentManager().findFragmentByTag(SettingsFragment.FRAGMENT_TAG);
+//            if (fragment == null) {
+//                fragment = new SettingsFragment();
+//            }
+//
+//            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+//            ft.add(R.id.fragment_container, fragment, SettingsFragment.FRAGMENT_TAG);
+//            ft.commit();
+//        }
+
         setupSeekBars();
         setupEditText();
     }
@@ -84,17 +118,19 @@ public class MainActivity extends AppCompatActivity {
                 hValue = 360.0*(Double.valueOf(progress)/100.0);
 
                 hSeekBarValue.setText(String.valueOf(df.format(hValue)));
-                updadeLEDColor();
+//                updateLEDColor();
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 vibrate(50);
+                isHSeekBarTouched = true;
+                startConnection();
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                isHSeekBarTouched = false;
             }
         });
 
@@ -104,17 +140,19 @@ public class MainActivity extends AppCompatActivity {
                 sValue = progress;
 
                 sSeekBarValue.setText(String.valueOf(sValue));
-                updadeLEDColor();
+//                updateLEDColor();
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 vibrate(50);
+                isHSeekBarTouched = true;
+                startConnection();
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                isHSeekBarTouched = false;
             }
         });
 
@@ -124,17 +162,19 @@ public class MainActivity extends AppCompatActivity {
                 vValue = progress;
 
                 vSeekBarValue.setText(String.valueOf(vValue));
-                updadeLEDColor();
+//                updateLEDColor();
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 vibrate(50);
+                isHSeekBarTouched = true;
+                startConnection();
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-
+                isHSeekBarTouched = false;
             }
         });
     }
@@ -158,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
                         hSeekBarValue.setText("0");
                     }else{
                         hValue = value;
-                        updadeLEDColor();
+//                        updateLEDColor();
                     }
                 }
             }
@@ -186,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
                         sSeekBarValue.setText("0");
                     }else{
                         sValue = value;
-                        updadeLEDColor();
+//                        updateLEDColor();
                     }
                 }
             }
@@ -214,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
                         vSeekBarValue.setText("0");
                     }else{
                         vValue = value;
-                        updadeLEDColor();
+//                        updateLEDColor();
                     }
                 }
             }
@@ -223,6 +263,32 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
             }
         });
+    }
+
+    private void startConnection(){
+        threadConnection = new Thread(new Runnable() {
+            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+            @Override
+            public void run() {
+                try {
+                    //Replace below IP with the IP of that device in which server socket open.
+                    //If you change port then change the port number in the server side code also.
+                    PrintWriter out;
+                    out = raspberryClient.startConnection(getApplicationContext());
+                    String lastMsg = "";
+                    do {
+                        if (!lastMsg.equals("H_VAL" + hValue + "S_VAL" + sValue + "V_VAL" + vValue)){
+                            lastMsg = "H_VAL" + hValue + "S_VAL" + sValue + "V_VAL" + vValue;
+                            raspberryClient.sendMessage(getApplicationContext(), out, "H_VAL" + hValue + "S_VAL" + sValue + "V_VAL" + vValue);
+                        }
+                    }while (isHSeekBarTouched ^ isSSeekBarTouched ^ isVSeekBarTouched);
+                    raspberryClient.sendMessage(getApplicationContext(), out,"!DISCONNECT");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        threadConnection.start();
     }
 
     public void vibrate(int timeImMs){
@@ -234,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void updadeLEDColor(){
+    private void updateLEDColor(){
         final Handler handler = new Handler();
         Thread thread = new Thread(new Runnable() {
             @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -243,8 +309,10 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     //Replace below IP with the IP of that device in which server socket open.
                     //If you change port then change the port number in the server side code also.
-                    raspberryClient.startConnection(getApplicationContext());
-                    raspberryClient.sendMessage("H_VAL" + hValue + "S_VAL" + sValue + "V_VAL" + vValue);
+                    PrintWriter out;
+                    out = raspberryClient.startConnection(getApplicationContext());
+                    raspberryClient.sendMessage(getApplicationContext(), out,"H_VAL" + hValue + "S_VAL" + sValue + "V_VAL" + vValue);
+                    raspberryClient.sendMessage(getApplicationContext(), out,"!DISCONNECT");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -258,4 +326,41 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), msg, LENGTH_LONG).show();
     }
 
+    @Override
+    public boolean onPreferenceStartScreen(PreferenceFragmentCompat preferenceFragmentCompat,
+                                           PreferenceScreen preferenceScreen) {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        SettingsFragment fragment = new SettingsFragment();
+        Bundle args = new Bundle();
+        args.putString(PreferenceFragmentCompat.ARG_PREFERENCE_ROOT, preferenceScreen.getKey());
+        fragment.setArguments(args);
+        ft.add(R.id.fragment_container, fragment, preferenceScreen.getKey());
+        ft.addToBackStack(preferenceScreen.getKey());
+        ft.commit();
+        return true;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.action_menu:
+                Toast.makeText(this, item.getTitle() + " pressed!", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 }
