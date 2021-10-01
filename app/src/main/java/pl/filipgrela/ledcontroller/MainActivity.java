@@ -1,9 +1,7 @@
 package pl.filipgrela.ledcontroller;
 
 import androidx.annotation.RequiresApi;
-import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
@@ -13,15 +11,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -37,7 +37,7 @@ import static android.widget.Toast.LENGTH_LONG;
 
 public class MainActivity extends AppCompatActivity implements
         PreferenceFragmentCompat.OnPreferenceStartScreenCallback {
-    private String TAG = "MainActivity";
+    private final String TAG = "MainActivity";
 
     SettingsActivity settingsActivity;
 
@@ -45,9 +45,9 @@ public class MainActivity extends AppCompatActivity implements
 
     private RaspberryClient raspberryClient;
 
-    private DecimalFormat df = new DecimalFormat("#.#");
+    private final DecimalFormat df = new DecimalFormat("#.#");
 
-    private Thread threadConnection;
+    private LinearLayout linearLayout;
 
     private EditText hSeekBarValue;
     private EditText sSeekBarValue;
@@ -77,6 +77,8 @@ public class MainActivity extends AppCompatActivity implements
 
         raspberryClient = new RaspberryClient();
 
+        linearLayout = findViewById(R.id.activity_main_linear_layout);
+
         hSeekBar = findViewById(R.id.HSeekbar);
         sSeekBar = findViewById(R.id.SSeekbar);
         vSeekBar = findViewById(R.id.VSeekbar);
@@ -94,31 +96,32 @@ public class MainActivity extends AppCompatActivity implements
         sSeekBar.setProgress((int) (sValue));
         vSeekBar.setProgress((int) (vValue));
 
-//        if (savedInstanceState == null) {
-//            // Create the fragment only when the activity is created for the first time.
-//            // ie. not after orientation changes
-//            Fragment fragment = getSupportFragmentManager().findFragmentByTag(SettingsFragment.FRAGMENT_TAG);
-//            if (fragment == null) {
-//                fragment = new SettingsFragment();
-//            }
-//
-//            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-//            ft.add(R.id.fragment_container, fragment, SettingsFragment.FRAGMENT_TAG);
-//            ft.commit();
-//        }
-
+        //TODO Zrobić zapamiętywanie ostatnio wybarnego koloru, oraz ładowanie przys starcie.
+        setupKeyboardHide();
         setupSeekBars();
         setupEditText();
+    }
+
+    private void setupKeyboardHide(){
+        linearLayout.setOnTouchListener((v, event) -> {
+            InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(linearLayout.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
+
+            hSeekBarValue.clearFocus();
+            sSeekBarValue.clearFocus();
+            vSeekBarValue.clearFocus();
+            return true;
+        });
     }
 
     private void setupSeekBars(){
         hSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                hValue = 360.0*(Double.valueOf(progress)/100.0);
-
-                hSeekBarValue.setText(String.valueOf(df.format(hValue)));
-//                updateLEDColor();
+                if (fromUser){
+                    hValue = 360.0*((double) progress /100.0);
+                    hSeekBarValue.setText(df.format(hValue));
+                }
             }
 
             @Override
@@ -137,49 +140,50 @@ public class MainActivity extends AppCompatActivity implements
         sSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                sValue = progress;
-
-                sSeekBarValue.setText(String.valueOf(sValue));
-//                updateLEDColor();
+                if (fromUser){
+                    sValue = progress;
+                    sSeekBarValue.setText(String.valueOf(sValue));
+                }
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 vibrate(50);
-                isHSeekBarTouched = true;
+                isSSeekBarTouched = true;
                 startConnection();
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                isHSeekBarTouched = false;
+                isSSeekBarTouched = false;
             }
         });
 
         vSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                vValue = progress;
-
-                vSeekBarValue.setText(String.valueOf(vValue));
-//                updateLEDColor();
+                if (fromUser){
+                    vValue = progress;
+                    vSeekBarValue.setText(String.valueOf(vValue));
+                }
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 vibrate(50);
-                isHSeekBarTouched = true;
+                isVSeekBarTouched = true;
                 startConnection();
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                isHSeekBarTouched = false;
+                isVSeekBarTouched = false;
             }
         });
     }
 
     private void setupEditText(){
+
         hSeekBarValue.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -187,18 +191,20 @@ public class MainActivity extends AppCompatActivity implements
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                if(s == null || !s.toString().isEmpty()) {
-                    double value = Double.parseDouble(String.valueOf(s));
-                    if(value > 360){
-                        makeToast("Max value for H is 360");
-                        hSeekBarValue.setText("360");
-                    }else if(value < 0){
-                        makeToast("Min value for H is 0");
-                        hSeekBarValue.setText("0");
-                    }else{
-                        hValue = value;
-//                        updateLEDColor();
+                if(s != null || !s.toString().isEmpty()) {
+                    if(!isHSeekBarTouched){
+                        double value = Double.parseDouble(String.valueOf(s));
+                        if(value > 360){
+                            makeToast("Max value for H is 360");
+                            hSeekBarValue.setText("360");
+                        }else if(value < 0){
+                            makeToast("Min value for H is 0");
+                            hSeekBarValue.setText("0");
+                        }else{
+                            hValue = value;
+                            hSeekBar.setProgress((int)((int) 100d / 360d *hValue));
+                            updateLEDColor();
+                        }
                     }
                 }
             }
@@ -216,17 +222,20 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                if(s == null || !s.toString().isEmpty()) {
-                    double value = Double.parseDouble(String.valueOf(s));
-                    if(value > 100){
-                        makeToast("Max value for S is 100");
-                        sSeekBarValue.setText("100");
-                    }else if(value < 0){
-                        makeToast("Min value for H is 0");
-                        sSeekBarValue.setText("0");
-                    }else{
-                        sValue = value;
-//                        updateLEDColor();
+                if(s != null || !s.toString().isEmpty()) {
+                    if(!isSSeekBarTouched){
+                        double value = Double.parseDouble(String.valueOf(s));
+                        if(value > 100){
+                            makeToast("Max value for S is 100");
+                            sSeekBarValue.setText("100");
+                        }else if(value < 0){
+                            makeToast("Min value for H is 0");
+                            sSeekBarValue.setText("0");
+                        }else{
+                            sValue = value;
+                            sSeekBar.setProgress((int) sValue);
+                            updateLEDColor();
+                        }
                     }
                 }
             }
@@ -244,17 +253,20 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                if(s == null || !s.toString().isEmpty()) {
-                    double value = Double.parseDouble(String.valueOf(s));
-                    if(value > 100){
-                        makeToast("Max value for H is 100");
-                        vSeekBarValue.setText("100");
-                    }else if(value < 0){
-                        makeToast("Min value for H is 0");
-                        vSeekBarValue.setText("0");
-                    }else{
-                        vValue = value;
-//                        updateLEDColor();
+                if(s != null || !s.toString().isEmpty() ^ !isVSeekBarTouched) {
+                    if(!isVSeekBarTouched){
+                        double value = Double.parseDouble(String.valueOf(s));
+                        if(value > 100){
+                            makeToast("Max value for H is 100");
+                            vSeekBarValue.setText("100");
+                        }else if(value < 0){
+                            makeToast("Min value for H is 0");
+                            vSeekBarValue.setText("0");
+                        }else{
+                            vValue = value;
+                            vSeekBar.setProgress((int) vValue);
+                            updateLEDColor();
+                        }
                     }
                 }
             }
@@ -266,26 +278,24 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void startConnection(){
-        threadConnection = new Thread(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-            @Override
-            public void run() {
-                try {
-                    //Replace below IP with the IP of that device in which server socket open.
-                    //If you change port then change the port number in the server side code also.
-                    PrintWriter out;
-                    out = raspberryClient.startConnection(getApplicationContext());
-                    String lastMsg = "";
-                    do {
-                        if (!lastMsg.equals("H_VAL" + hValue + "S_VAL" + sValue + "V_VAL" + vValue)){
-                            lastMsg = "H_VAL" + hValue + "S_VAL" + sValue + "V_VAL" + vValue;
-                            raspberryClient.sendMessage(getApplicationContext(), out, "H_VAL" + hValue + "S_VAL" + sValue + "V_VAL" + vValue);
-                        }
-                    }while (isHSeekBarTouched ^ isSSeekBarTouched ^ isVSeekBarTouched);
-                    raspberryClient.sendMessage(getApplicationContext(), out,"!DISCONNECT");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        //Replace below IP with the IP of that device in which server socket open.
+        //If you change port then change the port number in the server side code also.
+        Thread threadConnection = new Thread(() -> {
+            try {
+                //Replace below IP with the IP of that device in which server socket open.
+                //If you change port then change the port number in the server side code also.
+                PrintWriter out;
+                out = raspberryClient.startConnection(getApplicationContext());
+                String lastMsg = "";
+                do {
+                    if (!lastMsg.equals("H_VAL" + hValue + "S_VAL" + sValue + "V_VAL" + vValue)) {
+                        lastMsg = "H_VAL" + hValue + "S_VAL" + sValue + "V_VAL" + vValue;
+                        raspberryClient.sendMessage(getApplicationContext(), out, "H_VAL" + hValue + "S_VAL" + sValue + "V_VAL" + vValue);
+                    }
+                } while (isHSeekBarTouched ^ isSSeekBarTouched ^ isVSeekBarTouched);
+                raspberryClient.sendMessage(getApplicationContext(), out, "!DISCONNECT");
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         });
         threadConnection.start();
@@ -301,21 +311,16 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void updateLEDColor(){
-        final Handler handler = new Handler();
-        Thread thread = new Thread(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-            @Override
-            public void run() {
-                try {
-                    //Replace below IP with the IP of that device in which server socket open.
-                    //If you change port then change the port number in the server side code also.
-                    PrintWriter out;
-                    out = raspberryClient.startConnection(getApplicationContext());
-                    raspberryClient.sendMessage(getApplicationContext(), out,"H_VAL" + hValue + "S_VAL" + sValue + "V_VAL" + vValue);
-                    raspberryClient.sendMessage(getApplicationContext(), out,"!DISCONNECT");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+        Thread thread = new Thread(() -> {
+            try {
+                //Replace below IP with the IP of that device in which server socket open.
+                //If you change port then change the port number in the server side code also.
+                PrintWriter out;
+                out = raspberryClient.startConnection(getApplicationContext());
+                raspberryClient.sendMessage(getApplicationContext(), out,"H_VAL" + hValue + "S_VAL" + sValue + "V_VAL" + vValue);
+                raspberryClient.sendMessage(getApplicationContext(), out,"!DISCONNECT");
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         });
         thread.start();
@@ -347,6 +352,7 @@ public class MainActivity extends AppCompatActivity implements
         return true;
     }
 
+    @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will

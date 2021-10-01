@@ -6,13 +6,24 @@
     android:layout_width="match_parent"
     android:key="key_root">
 
-    <SwitchPreferenceCompat
-        android:key="notifications"
-        app:title="Enable message notifications"/>
+    <EditTextPreference
+        android:key="server_ip"
+        android:title="Ustaw ip servera połączonego z Raspberry Pi"
+        android:persistent="true"
+        android:dialogTitle="Podaj adres ip"
+        android:summary="Ustaw twój adres ip"
+        android:icon="@drawable/ic_ip_icon"
+        android:dialogMessage="Wpisz w poniższe pole adres ip urządzenia na którym odpalasz serwer sterujacy oświetleniem, aby go sprawdzić możesz zalogować się na stronę routera."
+        android:defaultValue="192.168.8.137" />
 
-    <Preference
-        android:key="feedback"
-        app:title="Send feedback"
-        android:summary="Report technical issues or suggest new features"/>
+    <EditTextPreference
+        android:key="server_port"
+        android:title="Ustaw port połączenia z serwerem"
+        android:persistent="true"
+        android:dialogTitle="Podaj port"
+        android:summary="Ustaw twój adres port"
+        android:icon="@drawable/ic_port_icon"
+        android:dialogMessage="Wpisz w poniższe pole port na którym został uruchomiony socket, możesz go znaleźć w kodzie na Raspberry Pi. Domyślnie 6061."
+        android:defaultValue="6061" />
 
 </PreferenceScreen>
