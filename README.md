@@ -2,8 +2,8 @@
 
 Control your LEDs with your phone connected via WiFi to the Raspberry Pi
 
-![aplication main screen](https://github.com/FilipGrela/Phone-led-controler/blob/main/images/main_screen.jpg)
-![aplication settings screen](https://github.com/FilipGrela/Phone-led-controler/blob/main/images/settings_screen.jpg)
+![aplication main screen](https://github.com/FilipGrela/Phone-led-controler/blob/main/images/main_screen.jpg | width=150))
+![aplication settings screen](https://github.com/FilipGrela/Phone-led-controler/blob/main/images/settings_screen.jp | width=150))
 # Requirements
 
 Hardware Requirements:
@@ -56,3 +56,5 @@ To change IP and port just simply:
 1. Open settings
 2. Change IP
 3. Change port
+
+![Kitty!](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
