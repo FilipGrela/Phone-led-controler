@@ -2,8 +2,8 @@
 
 Control your LEDs with your phone connected via WiFi to the Raspberry Pi
 
-![aplication main screen](https://github.com/FilipGrela/Phone-led-controler/blob/main/images/main_screen.jpg ) | width=150)
-![aplication settings screen](https://github.com/FilipGrela/Phone-led-controler/blob/main/images/settings_screen.jp) | width=150)
+![aplication main screen](https://github.com/FilipGrela/Phone-led-controler/blob/main/images/main_screen.jpg | width=150)
+![aplication settings screen](https://github.com/FilipGrela/Phone-led-controler/blob/main/images/settings_screen.jp | width=150)
 # Requirements
 
 Hardware Requirements:
