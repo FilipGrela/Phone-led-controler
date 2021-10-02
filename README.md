@@ -56,3 +56,5 @@ To change IP and port just simply:
 1. Open settings
 2. Change IP
 3. Change port
+
+![Kitty!](https://media.giphy.com/media/vFKqnCdLPNOKc/giphy.gif)
