@@ -17,8 +17,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -102,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements
         setupEditText();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void setupKeyboardHide(){
         linearLayout.setOnTouchListener((v, event) -> {
             InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
@@ -189,16 +188,17 @@ public class MainActivity extends AppCompatActivity implements
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if(s != null || !s.toString().isEmpty()) {
                     if(!isHSeekBarTouched){
                         double value = Double.parseDouble(String.valueOf(s));
                         if(value > 360){
-                            makeToast("Max value for H is 360");
+                            makeToast(getResources().getString(R.string.toast_h_over_range) + "!");
                             hSeekBarValue.setText("360");
                         }else if(value < 0){
-                            makeToast("Min value for H is 0");
+                            makeToast(getResources().getString(R.string.toast_h_under_range) + "!");
                             hSeekBarValue.setText("0");
                         }else{
                             hValue = value;
@@ -219,6 +219,7 @@ public class MainActivity extends AppCompatActivity implements
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
@@ -226,10 +227,10 @@ public class MainActivity extends AppCompatActivity implements
                     if(!isSSeekBarTouched){
                         double value = Double.parseDouble(String.valueOf(s));
                         if(value > 100){
-                            makeToast("Max value for S is 100");
+                            makeToast(getResources().getString(R.string.toast_s_over_range) + "!");
                             sSeekBarValue.setText("100");
                         }else if(value < 0){
-                            makeToast("Min value for H is 0");
+                            makeToast(getResources().getString(R.string.toast_s_under_range) + "!");
                             sSeekBarValue.setText("0");
                         }else{
                             sValue = value;
@@ -250,6 +251,7 @@ public class MainActivity extends AppCompatActivity implements
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
 
+            @SuppressLint("SetTextI18n")
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
@@ -257,10 +259,10 @@ public class MainActivity extends AppCompatActivity implements
                     if(!isVSeekBarTouched){
                         double value = Double.parseDouble(String.valueOf(s));
                         if(value > 100){
-                            makeToast("Max value for H is 100");
+                            makeToast(getResources().getString(R.string.toast_v_over_range) + "!");
                             vSeekBarValue.setText("100");
                         }else if(value < 0){
-                            makeToast("Min value for H is 0");
+                            makeToast(getResources().getString(R.string.toast_v_under_range) + "!");
                             vSeekBarValue.setText("0");
                         }else{
                             vValue = value;

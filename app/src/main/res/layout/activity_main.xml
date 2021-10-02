@@ -10,7 +10,7 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:text="Wybierz watroci HSV"
+        android:text="@string/main_activity_title"
         android:paddingTop="45dp"
         android:textSize="32sp"
         android:layout_width="wrap_content"
@@ -31,7 +31,7 @@
             android:id="@+id/HSeekbarValue"
             android:layout_width="54dp"
             android:layout_height="wrap_content"
-            android:layout_marginRight="8dp"
+            android:layout_marginEnd="8dp"
             android:inputType="numberDecimal"
             android:text="0"/>
 
@@ -40,7 +40,7 @@
             android:id="@+id/HSeekbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:ignore="MissingConstraints" />
+            tools:ignore="MissingConstraints"/>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -60,7 +60,7 @@
             android:layout_width="54dp"
             android:layout_height="wrap_content"
             android:inputType="numberDecimal"
-            android:layout_marginRight="8dp"
+            android:layout_marginEnd="8dp"
             android:text="0"/>
 
 
@@ -88,7 +88,7 @@
             android:layout_width="54dp"
             android:layout_height="wrap_content"
             android:inputType="numberDecimal"
-            android:layout_marginRight="8dp"
+            android:layout_marginEnd="8dp"
             android:text="0"/>
 
 

@@ -8,22 +8,22 @@
 
     <EditTextPreference
         android:key="server_ip"
-        android:title="Ustaw ip servera połączonego z Raspberry Pi"
+        android:title="@string/edit_text_preference_ip_title"
         android:persistent="true"
-        android:dialogTitle="Podaj adres ip"
-        android:summary="Ustaw twój adres ip"
+        android:dialogTitle="@string/edit_text_preference_ip_dialog_title"
+        android:summary="@string/edit_text_preference_ip_dialog_summary"
         android:icon="@drawable/ic_ip_icon"
-        android:dialogMessage="Wpisz w poniższe pole adres ip urządzenia na którym odpalasz serwer sterujacy oświetleniem, aby go sprawdzić możesz zalogować się na stronę routera."
+        android:dialogMessage="@string/edit_text_preference_ip_dialog_message"
         android:defaultValue="192.168.8.137" />
 
     <EditTextPreference
         android:key="server_port"
-        android:title="Ustaw port połączenia z serwerem"
+        android:title="@string/edit_text_preference_port_title"
         android:persistent="true"
-        android:dialogTitle="Podaj port"
-        android:summary="Ustaw twój adres port"
+        android:dialogTitle="@string/edit_text_preference_port_dialog_title"
+        android:summary="@string/edit_text_preference_port_dialog_summary"
         android:icon="@drawable/ic_port_icon"
-        android:dialogMessage="Wpisz w poniższe pole port na którym został uruchomiony socket, możesz go znaleźć w kodzie na Raspberry Pi. Domyślnie 6061."
+        android:dialogMessage="@string/edit_text_preference_port_dialog_message"
         android:defaultValue="6061" />
 
 </PreferenceScreen>

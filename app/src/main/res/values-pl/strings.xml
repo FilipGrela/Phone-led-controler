@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Led controller</string>
+    <string name="pref_title">Narzędzie do wybierania kolorów</string>
+    <string name="action_menu">Ustawienia</string>
+    <string name="edit_text_preference_ip_summary" translatable="false">Aktualny adres ip</string>
+    <string name="edit_text_preference_port_summary">Altualny port</string>
+    <string name="toast_h_over_range">Maksymalna wartość dla H to 360</string>
+    <string name="toast_h_under_range">Minimalna wartość dla H to 0</string>
+    <string name="toast_s_over_range">Maksymalna wartość dla S to 100</string>
+    <string name="toast_s_under_range">Minimalna wartość dla S to 0</string>
+    <string name="toast_v_over_range">Maksymalna wartość dla H to 100</string>
+    <string name="toast_v_under_range">Minimalna wartość dla H to 0</string>
+    <string name="main_activity_title">Wybierz wartości HSV</string>
+    <string name="edit_text_preference_ip_title">Ustaw ip serwera połączonego z Raspberry Pi</string>
+    <string name="edit_text_preference_ip_dialog_title">Podaj adres ip</string>
+    <string name="edit_text_preference_ip_dialog_summary">Ustaw swój adres ip</string>
+    <string name="edit_text_preference_ip_dialog_message">Wpisz w poniższe pole adres ip urządzenia na którym odpalasz serwer sterujacy oświetleniem, aby go sprawdzić możesz zalogować się na stronę routera.</string>
+    <string name="edit_text_preference_port_title">Ustaw port połączenia z serwerem</string>
+    <string name="edit_text_preference_port_dialog_message">Wpisz w poniższe pole port na którym został uruchomiony socket, możesz go znaleźć w kodzie na Raspberry Pi. Domyślnie 6061.</string>
+    <string name="edit_text_preference_port_dialog_title">Podaj port</string>
+    <string name="edit_text_preference_port_dialog_summary">Ustaw swój adres port</string>
+</resources>
