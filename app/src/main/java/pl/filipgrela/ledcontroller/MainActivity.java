@@ -277,6 +277,7 @@ public class MainActivity extends AppCompatActivity implements
         });
     }
 
+    //TODO przerzucić wątek do RaspberryClient
     private void startConnection(){
         //Replace below IP with the IP of that device in which server socket open.
         //If you change port then change the port number in the server side code also.
@@ -310,6 +311,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+    //TODO przerzucić wątek do RaspberryClient
     private void updateLEDColor(){
         Thread thread = new Thread(() -> {
             try {
@@ -362,7 +364,6 @@ public class MainActivity extends AppCompatActivity implements
 
         switch (id) {
             case R.id.action_menu:
-                Toast.makeText(this, item.getTitle() + " pressed!", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
         }
