@@ -59,6 +59,8 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             makeToast(getResources().getString(R.string.edit_text_preference_port_summary) + ": " + pref.getInt("Server_port", 6061));
             return false;
         });
+
+        //TODO ręczna zmianę jezyka
     }
 
     @SuppressLint("ShowToast")
