@@ -2,8 +2,8 @@
 
 Control your LEDs with your phone connected via WiFi to the Raspberry Pi
 
-![aplication main screen](https://github.com/FilipGrela/Phone-led-controler/blob/main/images/main_screen.jpg)
-![aplication settings screen](https://github.com/FilipGrela/Phone-led-controler/blob/main/images/settings_screen.jpg)
+![application main screen](https://github.com/FilipGrela/Phone-led-controler/blob/main/images/main_screen.jpg)
+![application settings screen](https://github.com/FilipGrela/Phone-led-controler/blob/main/images/settings_screen.jpg)
 # Requirements
 
 Hardware Requirements:
@@ -12,7 +12,7 @@ Hardware Requirements:
 1. LED strip
 1. Raspberry Pi
 
-## Instalation
+## Installation
 
 To control the LEDs:
 1. Download release.
@@ -23,9 +23,9 @@ To control the LEDs:
 5. Connecting the Raspberry Pi and the phone to a common network.
 
 
-### Liblaries
+### Libraries
 
-To run the program you need to download all the required libraries, to do this enter the following comments in the command line on the Raspperry Pi
+To run the program you need to download all the required libraries, to do this enter the following comments in the command line on the Raspberry Pi
 
 - install `python3.6`
 - install LED library:
@@ -37,7 +37,7 @@ sudo pip install rpi_ws281x
 ### Preparation of Raspberry Pi:
 
 To properly prepare the Raspberry Pi:
-* connect the leds to the Rasperry Pi
+* connect the leads to the Raspberry Pi
 * open the file `phone_controller.py` 
 * correct amount of pixels your LED strip has
 * correct GPIO pin 
@@ -45,7 +45,7 @@ To properly prepare the Raspberry Pi:
 
 ### Run program
 
-To run progra just type:
+To run program just type:
 ```sh
 sudo python3 phone_controller.py
 ```

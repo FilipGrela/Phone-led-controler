@@ -11,7 +11,7 @@ import pl.filipgrela.ledcontroller.R;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    public static final String FRAGMENT_TAG = "my_preference_activity";
+    public static final String TAG = "my_preference_activity";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

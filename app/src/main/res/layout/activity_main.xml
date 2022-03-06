@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:inputType="numberDecimal"
-            android:text="0"/>
+            android:hint="0"/>
 
 
         <SeekBar
@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:inputType="numberDecimal"
             android:layout_marginEnd="8dp"
-            android:text="0"/>
+            android:hint="0"/>
 
 
         <SeekBar
@@ -89,7 +89,7 @@
             android:layout_height="wrap_content"
             android:inputType="numberDecimal"
             android:layout_marginEnd="8dp"
-            android:text="0"/>
+            android:hint="0"/>
 
 
         <SeekBar

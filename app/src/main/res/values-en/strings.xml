@@ -20,4 +20,9 @@
     <string name="edit_text_preference_port_dialog_title">Enter the port</string>
     <string name="edit_text_preference_port_dialog_summary">Set your port address</string>
     <string name="edit_text_preference_port_dialog_message">Enter the port on which the socket was running in the field below, you can find it in the code on the Raspberry Pi. Default 6061.</string>
+    <string name="shutdown_menu">Shutdown</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">Ok</string>
+    <string name="alertShutdown">You will completely shut down the raspberry pi. To re-enable the program, you will need to connect the power supply again.</string>
+    <string name="attention">Attention!</string>
 </resources>

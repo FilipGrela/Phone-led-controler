@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 
@@ -16,9 +15,11 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
-import pl.filipgrela.ledcontroller.MainActivity;
+import pl.filipgrela.ledcontroller.Variables;
 
 public class RaspberryClient {
+
+    Variables variables = Variables.getInstance();
 
     private static final String TAG = "RaspberryClient";
 
@@ -43,11 +44,13 @@ public class RaspberryClient {
                 getPrefServerPort(context));
     }
 
+    int hostConnectionsTries = 0;
     public PrintWriter startConnection(Context context, String ip , int port) {
         this.context = context;
         out = null;
 
         if (isHostIsReachable(context, ip)) {
+            hostConnectionsTries = 0;
             pref = context.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
             editor = pref.edit();
 
@@ -55,18 +58,69 @@ public class RaspberryClient {
 
             try {
                 clientSocket = new Socket(ip, port);
+                Log.d(TAG, "Connected");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Log.d(TAG, "Connected");
             try {
-                out = new PrintWriter(clientSocket.getOutputStream(), true);
-                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                if (clientSocket != null) {
+                    out = new PrintWriter(clientSocket.getOutputStream(), true);
+                    in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                }else{
+                    Log.d(TAG, "Unable to send data");
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }else{
+            hostConnectionsTries++;
+            if(hostConnectionsTries <5){
+                startConnection(context, ip, port);
+            }
+            hostConnectionsTries = 0;
+            Log.d(TAG, "Host unreachable");
         }
         return out;
+    }
+    public void startHSVConnection(Context context){
+        Log.d(TAG, "Starting hsv connection");
+        //Replace below IP with the IP of that device in which server socket open.
+        //If you change port then change the port number in the server side code also.
+        Thread threadConnection = new Thread(() -> {
+            try {
+                //Replace below IP with the IP of that device in which server socket open.
+                //If you change port then change the port number in the server side code also.
+                PrintWriter out;
+                out = startConnection(context);
+                String lastMsg = "";
+                do {
+                    if (!lastMsg.equals("H_VAL" + variables.hValue + "S_VAL" + variables.sValue + "V_VAL" + variables.vValue)) {
+                        lastMsg = "H_VAL" + variables.hValue + "S_VAL" + variables.sValue + "V_VAL" + variables.vValue;
+                        sendMessage(context, out, "H_VAL" + variables.hValue + "S_VAL" + variables.sValue + "V_VAL" + variables.vValue);
+                    }
+                } while (variables.isHSeekBarTouched ^ variables.isSSeekBarTouched ^ variables.isVSeekBarTouched);
+                sendMessage(context, out, "!DISCONNECT");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        threadConnection.start();
+    }
+
+    public void updateLEDColor(Context context){
+        Thread thread = new Thread(() -> {
+            try {
+                //Replace below IP with the IP of that device in which server socket open.
+                //If you change port then change the port number in the server side code also.
+                PrintWriter out;
+                out = startConnection(context);
+                sendMessage(context, out,"H_VAL" + variables.hValue + "S_VAL" + variables.sValue + "V_VAL" + variables.vValue);
+                sendMessage(context, out,"!DISCONNECT");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        thread.start();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -120,7 +174,7 @@ public class RaspberryClient {
         boolean reachable = false;
         try {
             InetAddress address = InetAddress.getByName(ip);
-            reachable = address.isReachable(15);
+            reachable = address.isReachable(175);
         } catch (IOException e){
             e.printStackTrace();
         }

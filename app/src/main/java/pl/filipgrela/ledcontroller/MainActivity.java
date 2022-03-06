@@ -2,6 +2,7 @@ package pl.filipgrela.ledcontroller;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
@@ -9,12 +10,14 @@ import androidx.preference.PreferenceScreen;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
@@ -23,19 +26,23 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.text.DecimalFormat;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import pl.filipgrela.ledcontroller.comunication.RaspberryClient;
 import pl.filipgrela.ledcontroller.settings.SettingsActivity;
 import pl.filipgrela.ledcontroller.settings.SettingsFragment;
+import pl.filipgrela.ledcontroller.settings.ShutdownDialog;
 
 import static android.widget.Toast.LENGTH_LONG;
 
 public class MainActivity extends AppCompatActivity implements
         PreferenceFragmentCompat.OnPreferenceStartScreenCallback {
     private final String TAG = "MainActivity";
+
+    SharedPreferences sharedPref;
+    Variables variables = Variables.getInstance();
 
     SettingsActivity settingsActivity;
 
@@ -55,19 +62,24 @@ public class MainActivity extends AppCompatActivity implements
     private SeekBar sSeekBar;
     private SeekBar vSeekBar;
 
-    private boolean isHSeekBarTouched = false;
-    private boolean isSSeekBarTouched = false;
-    private boolean isVSeekBarTouched = false;
 
-    private double hValue = 180;
-    private double sValue = 100;
-    private double vValue = 30;
+    private double hValue;
+    private double sValue;
+    private double vValue;
+
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        sharedPref = getApplicationContext().getSharedPreferences("hssssss", Context.MODE_PRIVATE);
+
+        loadPreferencesToVariables();
+        hValue = variables.hValue;
+        sValue = variables.sValue;
+        vValue = variables.vValue;
 
         settingsActivity = new SettingsActivity();
 
@@ -94,10 +106,11 @@ public class MainActivity extends AppCompatActivity implements
         sSeekBar.setProgress((int) (sValue));
         vSeekBar.setProgress((int) (vValue));
 
-        //TODO Zrobić zapamiętywanie ostatnio wybarnego koloru, oraz ładowanie przys starcie.
         setupKeyboardHide();
         setupSeekBars();
         setupEditText();
+
+        raspberryClient.updateLEDColor(getApplicationContext());
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -119,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser){
                     hValue = 360.0*((double) progress /100.0);
+                    variables.hValue = hValue;
                     hSeekBarValue.setText(df.format(hValue));
                 }
             }
@@ -126,13 +140,14 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 vibrate(50);
-                isHSeekBarTouched = true;
-                startConnection();
+                variables.isHSeekBarTouched = true;
+                raspberryClient.startHSVConnection(getApplicationContext());
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                isHSeekBarTouched = false;
+                variables.isHSeekBarTouched = false;
+                updateHSVPreferences();
             }
         });
 
@@ -141,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser){
                     sValue = progress;
+                    variables.sValue = sValue;
                     sSeekBarValue.setText(String.valueOf(sValue));
                 }
             }
@@ -148,13 +164,14 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 vibrate(50);
-                isSSeekBarTouched = true;
-                startConnection();
+                variables.isSSeekBarTouched = true;
+                raspberryClient.startHSVConnection(getApplicationContext());
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                isSSeekBarTouched = false;
+                variables.isSSeekBarTouched = false;
+                updateHSVPreferences();
             }
         });
 
@@ -163,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser){
                     vValue = progress;
+                    variables.vValue = vValue;
                     vSeekBarValue.setText(String.valueOf(vValue));
                 }
             }
@@ -170,13 +188,14 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 vibrate(50);
-                isVSeekBarTouched = true;
-                startConnection();
+                variables.isVSeekBarTouched = true;
+                raspberryClient.startHSVConnection(getApplicationContext());
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                isVSeekBarTouched = false;
+                variables.isVSeekBarTouched = false;
+                updateHSVPreferences();
             }
         });
     }
@@ -192,8 +211,8 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if(s != null || !s.toString().isEmpty()) {
-                    if(!isHSeekBarTouched){
-                        double value = Double.parseDouble(String.valueOf(s));
+                    if(!variables.isHSeekBarTouched){
+                        double value = ((!s.toString().equals("") && !s.toString().equals("."))? Double.parseDouble(String.valueOf(s)) : 0);
                         if(value > 360){
                             makeToast(getResources().getString(R.string.toast_h_over_range) + "!");
                             hSeekBarValue.setText("360");
@@ -202,8 +221,10 @@ public class MainActivity extends AppCompatActivity implements
                             hSeekBarValue.setText("0");
                         }else{
                             hValue = value;
+                            variables.hValue = hValue;
+                            updateHSVPreferences();
                             hSeekBar.setProgress((int)((int) 100d / 360d *hValue));
-                            updateLEDColor();
+                            raspberryClient.updateLEDColor(getApplicationContext());
                         }
                     }
                 }
@@ -224,8 +245,9 @@ public class MainActivity extends AppCompatActivity implements
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
                 if(s != null || !s.toString().isEmpty()) {
-                    if(!isSSeekBarTouched){
-                        double value = Double.parseDouble(String.valueOf(s));
+                    if(!variables.isSSeekBarTouched){
+                        Log.d(TAG, "string empty\"" + s + "\"");
+                        double value = ((!s.toString().equals("") && !s.toString().equals("."))? Double.parseDouble(String.valueOf(s)) : 0);
                         if(value > 100){
                             makeToast(getResources().getString(R.string.toast_s_over_range) + "!");
                             sSeekBarValue.setText("100");
@@ -234,8 +256,10 @@ public class MainActivity extends AppCompatActivity implements
                             sSeekBarValue.setText("0");
                         }else{
                             sValue = value;
+                            variables.sValue = sValue;
+                            updateHSVPreferences();
                             sSeekBar.setProgress((int) sValue);
-                            updateLEDColor();
+                            raspberryClient.updateLEDColor(getApplicationContext());
                         }
                     }
                 }
@@ -255,9 +279,9 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                if(s != null || !s.toString().isEmpty() ^ !isVSeekBarTouched) {
-                    if(!isVSeekBarTouched){
-                        double value = Double.parseDouble(String.valueOf(s));
+                if(s != null || !s.toString().isEmpty() ^ !variables.isVSeekBarTouched) {
+                    if(!variables.isVSeekBarTouched){
+                        double value = ((!s.toString().equals("") && !s.toString().equals("."))? Double.parseDouble(String.valueOf(s)) : 0);
                         if(value > 100){
                             makeToast(getResources().getString(R.string.toast_v_over_range) + "!");
                             vSeekBarValue.setText("100");
@@ -266,8 +290,10 @@ public class MainActivity extends AppCompatActivity implements
                             vSeekBarValue.setText("0");
                         }else{
                             vValue = value;
+                            variables.vValue = vValue;
+                            updateHSVPreferences();
                             vSeekBar.setProgress((int) vValue);
-                            updateLEDColor();
+                            raspberryClient.updateLEDColor(getApplicationContext());
                         }
                     }
                 }
@@ -275,33 +301,26 @@ public class MainActivity extends AppCompatActivity implements
 
             @Override
             public void afterTextChanged(Editable s) {
+
             }
         });
     }
 
-    //TODO przerzucić wątek do RaspberryClient
-    private void startConnection(){
-        //Replace below IP with the IP of that device in which server socket open.
-        //If you change port then change the port number in the server side code also.
-        Thread threadConnection = new Thread(() -> {
-            try {
-                //Replace below IP with the IP of that device in which server socket open.
-                //If you change port then change the port number in the server side code also.
-                PrintWriter out;
-                out = raspberryClient.startConnection(getApplicationContext());
-                String lastMsg = "";
-                do {
-                    if (!lastMsg.equals("H_VAL" + hValue + "S_VAL" + sValue + "V_VAL" + vValue)) {
-                        lastMsg = "H_VAL" + hValue + "S_VAL" + sValue + "V_VAL" + vValue;
-                        raspberryClient.sendMessage(getApplicationContext(), out, "H_VAL" + hValue + "S_VAL" + sValue + "V_VAL" + vValue);
-                    }
-                } while (isHSeekBarTouched ^ isSSeekBarTouched ^ isVSeekBarTouched);
-                raspberryClient.sendMessage(getApplicationContext(), out, "!DISCONNECT");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-        threadConnection.start();
+    public void loadPreferencesToVariables(){
+        variables.hValue = sharedPref.getFloat("hValue", 280);
+        variables.sValue = sharedPref.getFloat("sValue", 100);
+        variables.vValue = sharedPref.getFloat("vValue", 35);
+
+        Log.d(TAG, "Reading HSV preferences  h:" + variables.hValue + " s:"+ variables.sValue + " v:" + variables.vValue);
+    }
+
+    public void updateHSVPreferences(){
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putFloat("hValue", (float) variables.hValue);
+        editor.putFloat("sValue", (float) variables.sValue);
+        editor.putFloat("vValue", (float) variables.vValue);
+        editor.apply();
+        Log.d(TAG, "Updated HSV preferences  h:" + variables.hValue + " s:"+ variables.sValue + " v:" + variables.vValue);
     }
 
     public void vibrate(int timeImMs){
@@ -313,22 +332,7 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    //TODO przerzucić wątek do RaspberryClient
-    private void updateLEDColor(){
-        Thread thread = new Thread(() -> {
-            try {
-                //Replace below IP with the IP of that device in which server socket open.
-                //If you change port then change the port number in the server side code also.
-                PrintWriter out;
-                out = raspberryClient.startConnection(getApplicationContext());
-                raspberryClient.sendMessage(getApplicationContext(), out,"H_VAL" + hValue + "S_VAL" + sValue + "V_VAL" + vValue);
-                raspberryClient.sendMessage(getApplicationContext(), out,"!DISCONNECT");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-        thread.start();
-    }
+
 
     @SuppressLint("ShowToast")
     private void makeToast(String msg){
@@ -367,6 +371,12 @@ public class MainActivity extends AppCompatActivity implements
         switch (id) {
             case R.id.action_menu:
                 startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            case R.id.shutdown:
+
+                DialogFragment shutdownDialog = new ShutdownDialog();
+                shutdownDialog.show(getSupportFragmentManager(), TAG);
+
                 return true;
         }
 

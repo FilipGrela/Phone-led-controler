@@ -15,7 +15,7 @@ import static android.widget.Toast.LENGTH_LONG;
 
 public class SettingsFragment extends PreferenceFragmentCompat {
 
-    public static final String FRAGMENT_TAG = "my_preference_fragment";
+    public static final String TAG = "my_preference_fragment";
 
     EditTextPreference editTextPreferenceIp;
     EditTextPreference editTextPreferencePort;
