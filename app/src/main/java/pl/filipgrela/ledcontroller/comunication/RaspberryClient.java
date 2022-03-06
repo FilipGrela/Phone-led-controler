@@ -123,6 +123,22 @@ public class RaspberryClient {
         thread.start();
     }
 
+    public void sendCustomMessage(Context context, String msg){
+        Thread thread = new Thread(() -> {
+            try {
+                //Replace below IP with the IP of that device in which server socket open.
+                //If you change port then change the port number in the server side code also.
+                PrintWriter out;
+                out = startConnection(context);
+                sendMessage(context, out, msg);
+                sendMessage(context, out,"!DISCONNECT");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        thread.start();
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void sendMessage(Context context, PrintWriter out, String msg) {
         this.context = context;

@@ -2,6 +2,7 @@ package pl.filipgrela.ledcontroller;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.PreferenceFragmentCompat;
@@ -67,12 +68,15 @@ public class MainActivity extends AppCompatActivity implements
     private double sValue;
     private double vValue;
 
+    boolean isDarkModeDisabled = Boolean.parseBoolean(String.valueOf(AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_NO));
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        AppCompatDelegate.setDefaultNightMode(isDarkModeDisabled ? AppCompatDelegate.MODE_NIGHT_NO : AppCompatDelegate.MODE_NIGHT_YES);
 
         sharedPref = getApplicationContext().getSharedPreferences("hssssss", Context.MODE_PRIVATE);
 
@@ -111,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements
         setupEditText();
 
         raspberryClient.updateLEDColor(getApplicationContext());
+
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -374,7 +379,7 @@ public class MainActivity extends AppCompatActivity implements
                 return true;
             case R.id.shutdown:
 
-                DialogFragment shutdownDialog = new ShutdownDialog();
+                DialogFragment shutdownDialog = new ShutdownDialog(getApplicationContext());
                 shutdownDialog.show(getSupportFragmentManager(), TAG);
 
                 return true;

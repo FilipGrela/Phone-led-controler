@@ -14,9 +14,9 @@ public class Variables {
     private Variables(){
     }
 
-    public static synchronized Variables getInstance( ) {
+    public static synchronized Variables getInstance() {
         if (variables == null)
-            variables=new Variables();
+            variables = new Variables();
         return variables;
     }
 }

@@ -25,4 +25,9 @@
     <string name="ok">Rozumiem</string>
     <string name="alertShutdown">You will completely shut down the raspberry pi. To re-enable the program, you will need to connect the power supply again.</string>
     <string name="attention">Uwaga!</string>
+    <string name="alertOffProgram">Wyłacz program</string>
+    <string name="switch_preference_dark_theme">Ciemny motyw</string>
+    <string name="switch_preference_dark_theme_dialog_title">Przełącz ustawienie, aby zmienić motyw aplikacji</string>
+    <string name="switch_preference_dark_theme_dialog_summary">Przełącz ustawienie, aby zmienić motyw aplikacji</string>
+    <string name="switch_preference_dark_theme_dialog_message">Zmień motyw aplikacji</string>
 </resources>

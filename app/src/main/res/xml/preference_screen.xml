@@ -6,24 +6,40 @@
     android:layout_width="match_parent"
     android:key="key_root">
 
-    <EditTextPreference
-        android:key="server_ip"
-        android:title="@string/edit_text_preference_ip_title"
-        android:persistent="true"
-        android:dialogTitle="@string/edit_text_preference_ip_dialog_title"
-        android:summary="@string/edit_text_preference_ip_dialog_summary"
-        android:icon="@drawable/ic_ip_icon"
-        android:dialogMessage="@string/edit_text_preference_ip_dialog_message"
-        android:defaultValue="192.168.8.137" />
+    <PreferenceCategory
+        android:title="Connection">
+        <EditTextPreference
+            android:key="server_ip"
+            android:title="@string/edit_text_preference_ip_title"
+            android:persistent="true"
+            android:dialogTitle="@string/edit_text_preference_ip_dialog_title"
+            android:summary="@string/edit_text_preference_ip_dialog_summary"
+            android:icon="@drawable/ic_ip_icon"
+            android:dialogMessage="@string/edit_text_preference_ip_dialog_message"
+            android:defaultValue="192.168.8.137" />
 
-    <EditTextPreference
-        android:key="server_port"
-        android:title="@string/edit_text_preference_port_title"
-        android:persistent="true"
-        android:dialogTitle="@string/edit_text_preference_port_dialog_title"
-        android:summary="@string/edit_text_preference_port_dialog_summary"
-        android:icon="@drawable/ic_port_icon"
-        android:dialogMessage="@string/edit_text_preference_port_dialog_message"
-        android:defaultValue="6061" />
+        <EditTextPreference
+            android:key="server_port"
+            android:title="@string/edit_text_preference_port_title"
+            android:persistent="true"
+            android:dialogTitle="@string/edit_text_preference_port_dialog_title"
+            android:summary="@string/edit_text_preference_port_dialog_summary"
+            android:icon="@drawable/ic_port_icon"
+            android:dialogMessage="@string/edit_text_preference_port_dialog_message"
+            android:defaultValue="6061" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="Preferences">
+        <SwitchPreference
+            android:key="darkTheme"
+            android:title="@string/switch_preference_dark_theme"
+            android:summary="@string/switch_preference_dark_theme_dialog_summary"
+            android:dialogTitle="@string/switch_preference_dark_theme_dialog_title"
+            android:icon="@drawable/ic_theme"
+            android:dialogMessage="@string/switch_preference_dark_theme_dialog_message"
+
+            />
+    </PreferenceCategory>
 
 </PreferenceScreen>
