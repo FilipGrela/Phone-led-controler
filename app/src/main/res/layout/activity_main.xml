@@ -5,63 +5,63 @@
     android:id="@+id/activity_main_linear_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:gravity="center_horizontal"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <TextView
-        android:text="@string/main_activity_title"
-        android:paddingTop="45dp"
-        android:textSize="32sp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:paddingTop="45dp"
+        android:text="@string/main_activity_title"
+        android:textSize="32sp" />
 
     <androidx.appcompat.widget.LinearLayoutCompat
-        android:paddingTop="35dp"
-        android:paddingHorizontal="12dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="12dp"
+        android:paddingTop="35dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="H:"/>
+            android:text="H:" />
 
         <EditText
             android:id="@+id/HSeekbarValue"
             android:layout_width="54dp"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
-            android:inputType="numberDecimal"
-            android:hint="0"/>
+            android:hint="0"
+            android:inputType="numberDecimal" />
 
 
         <SeekBar
             android:id="@+id/HSeekbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:ignore="MissingConstraints"/>
+            tools:ignore="MissingConstraints" />
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
     <androidx.appcompat.widget.LinearLayoutCompat
-        android:paddingTop="35dp"
-        android:paddingHorizontal="12dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="12dp"
+        android:paddingTop="35dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="S:"/>
+            android:text="S:" />
 
         <EditText
             android:id="@+id/SSeekbarValue"
             android:layout_width="54dp"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal"
             android:layout_marginEnd="8dp"
-            android:hint="0"/>
+            android:hint="0"
+            android:inputType="numberDecimal" />
 
 
         <SeekBar
@@ -73,23 +73,23 @@
     </androidx.appcompat.widget.LinearLayoutCompat>
 
     <androidx.appcompat.widget.LinearLayoutCompat
-        android:paddingTop="35dp"
-        android:paddingHorizontal="12dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="12dp"
+        android:paddingTop="35dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="V:"/>
+            android:text="V:" />
 
         <EditText
             android:id="@+id/VSeekbarValue"
             android:layout_width="54dp"
             android:layout_height="wrap_content"
-            android:inputType="numberDecimal"
             android:layout_marginEnd="8dp"
-            android:hint="0"/>
+            android:hint="0"
+            android:inputType="numberDecimal" />
 
 
         <SeekBar
@@ -100,5 +100,62 @@
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="80dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:background="@drawable/rounded_rectangle"
+                android:id="@+id/favourite_0"
+                android:layout_width="55dp"
+                android:layout_height="65dp"/>
+
+            <Button
+                android:background="@drawable/rounded_rectangle"
+                android:id="@+id/favourite_1"
+                android:layout_width="55dp"
+                android:layout_height="65dp"
+                android:layout_marginHorizontal="15dp"/>
+
+            <Button
+                android:background="@drawable/rounded_rectangle"
+                android:id="@+id/favourite_2"
+                android:layout_width="55dp"
+                android:layout_height="65dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp">
+
+            <Button
+                android:background="@drawable/rounded_rectangle"
+                android:id="@+id/favourite_3"
+                android:layout_width="55dp"
+                android:layout_height="65dp" />
+
+            <Button
+                android:background="@drawable/rounded_rectangle"
+                android:id="@+id/favourite_4"
+                android:layout_width="55dp"
+                android:layout_height="65dp"
+                android:layout_marginHorizontal="15dp"/>
+
+            <Button
+                android:background="@drawable/rounded_rectangle"
+                android:id="@+id/favourite_5"
+                android:layout_width="55dp"
+                android:layout_height="65dp"/>
+        </LinearLayout>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
 </LinearLayout>

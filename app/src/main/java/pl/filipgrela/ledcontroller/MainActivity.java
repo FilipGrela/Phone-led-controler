@@ -12,6 +12,12 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RoundRectShape;
+import android.graphics.drawable.shapes.Shape;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
@@ -21,15 +27,16 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
 import java.text.DecimalFormat;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import pl.filipgrela.ledcontroller.comunication.RaspberryClient;
 import pl.filipgrela.ledcontroller.settings.SettingsActivity;
@@ -62,6 +69,8 @@ public class MainActivity extends AppCompatActivity implements
     private SeekBar hSeekBar;
     private SeekBar sSeekBar;
     private SeekBar vSeekBar;
+
+    private Button[] buttons = new Button[6];
 
 
     private double hValue;
@@ -102,6 +111,30 @@ public class MainActivity extends AppCompatActivity implements
         vSeekBarValue = findViewById(R.id.VSeekbarValue);
 
 
+        buttons[0] = findViewById(R.id.favourite_0);
+        buttons[1] = findViewById(R.id.favourite_1);
+        buttons[2] = findViewById(R.id.favourite_2);
+        buttons[3] = findViewById(R.id.favourite_3);
+        buttons[4] = findViewById(R.id.favourite_4);
+        buttons[5] = findViewById(R.id.favourite_5);
+
+
+
+        updateUI();
+        setupKeyboardHide();
+        setupSeekBars();
+        setupEditText();
+        setupFavouriteColors();
+
+        raspberryClient.updateLEDColor(getApplicationContext());
+
+    }
+
+    private void updateUI() {
+        hValue = variables.hValue;
+        sValue = variables.sValue;
+        vValue = variables.vValue;
+
         hSeekBarValue.setText(String.valueOf(hValue));
         sSeekBarValue.setText(String.valueOf(sValue));
         vSeekBarValue.setText(String.valueOf(vValue));
@@ -109,14 +142,56 @@ public class MainActivity extends AppCompatActivity implements
         hSeekBar.setProgress((int) (hValue/360*100));
         sSeekBar.setProgress((int) (sValue));
         vSeekBar.setProgress((int) (vValue));
-
-        setupKeyboardHide();
-        setupSeekBars();
-        setupEditText();
-
-        raspberryClient.updateLEDColor(getApplicationContext());
-
     }
+
+    private void setupFavouriteColors() {
+        for (int j = 0; j <= buttons.length - 1; j++){
+            final int i = j;
+            buttons[i].setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    variables.hValue = sharedPref.getFloat("favorites_button_h" + buttons[i].getId(), 180);
+                    variables.sValue = sharedPref.getFloat("favorites_button_s" + buttons[i].getId(), 100);
+                    variables.vValue = sharedPref.getFloat("favorites_button_v" + buttons[i].getId(), 0);
+                    updateUI();
+
+                    raspberryClient.updateLEDColor(getApplicationContext());
+
+                }
+            });
+
+            buttons[i].setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    vibrate(50);
+
+                    saveColorToFavourites(buttons[i]);
+
+                    RoundRectShape rectShape = new RoundRectShape(new float[]{
+                            50, 50, 50, 50,
+                            50, 50, 50, 50
+                    }, null, null);
+                    ShapeDrawable shapeDrawable = new ShapeDrawable(rectShape);
+                    shapeDrawable.getPaint().setColor(Color.HSVToColor(new float[]{(float) hValue, (float) sValue, (float) vValue}));
+                    shapeDrawable.getPaint().setStyle(Paint.Style.FILL);
+                    shapeDrawable.getPaint().setAntiAlias(true);
+                    shapeDrawable.getPaint().setFlags(Paint.ANTI_ALIAS_FLAG);
+
+                    buttons[i].setForeground(shapeDrawable);
+
+                    return false;
+                }
+            });
+        }
+    }
+
+    private void saveColorToFavourites(Button button) {
+        updatePreferences("favorites_button_h" + button.getId(), (float) hValue);
+        updatePreferences("favorites_button_s" + button.getId(), (float) sValue);
+        updatePreferences("favorites_button_v" + button.getId(), (float) vValue);
+    }
+
+
 
     @SuppressLint("ClickableViewAccessibility")
     private void setupKeyboardHide(){
@@ -317,6 +392,20 @@ public class MainActivity extends AppCompatActivity implements
         variables.vValue = sharedPref.getFloat("vValue", 35);
 
         Log.d(TAG, "Reading HSV preferences  h:" + variables.hValue + " s:"+ variables.sValue + " v:" + variables.vValue);
+    }
+
+    public void updatePreferences(String key, String value){
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(key, value);
+        editor.apply();
+        Log.d(TAG, "Updated \"" + key + "\" preferences with:\"" + value + "\"");
+    }
+
+    public void updatePreferences(String key, Float value){
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putFloat(key, value);
+        editor.apply();
+        Log.d(TAG, "Updated \"" + key + "\" preferences with:\"" + value + "\"");
     }
 
     public void updateHSVPreferences(){

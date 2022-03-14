@@ -2,7 +2,6 @@ package pl.filipgrela.ledcontroller.settings;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -29,13 +28,13 @@ public class ShutdownDialog extends DialogFragment {
         builder.setMessage(R.string.alertShutdown)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        new RaspberryClient().sendCustomMessage(context, "message shutdown");
+                        new RaspberryClient().sendCustomMessage(context, "g3VH$wPq~2?(;MhF#5vaG{/\"eUAf]+`ynCd8z!DJxcXsSj=r)%");
                     }
                 })
                 .setNeutralButton(R.string.alertOffProgram, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        new RaspberryClient().sendCustomMessage(context, "message disable");
+                        new RaspberryClient().sendCustomMessage(context, "fW;X#.`V:BhGg&-UT*?'+}FxY]c9<%S3w![Kk\"/E2rHNzD)QqM");
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

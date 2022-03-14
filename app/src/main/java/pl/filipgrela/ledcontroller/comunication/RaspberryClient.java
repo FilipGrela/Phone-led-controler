@@ -190,7 +190,7 @@ public class RaspberryClient {
         boolean reachable = false;
         try {
             InetAddress address = InetAddress.getByName(ip);
-            reachable = address.isReachable(175);
+            reachable = address.isReachable(75);
         } catch (IOException e){
             e.printStackTrace();
         }
