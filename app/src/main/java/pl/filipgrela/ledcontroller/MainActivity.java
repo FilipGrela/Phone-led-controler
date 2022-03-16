@@ -147,6 +147,12 @@ public class MainActivity extends AppCompatActivity implements
     private void setupFavouriteColors() {
         for (int j = 0; j <= buttons.length - 1; j++){
             final int i = j;
+
+            setButtonColor(buttons[i],
+                    sharedPref.getFloat("favorites_button_h" + buttons[i].getId(), 180),
+                    sharedPref.getFloat("favorites_button_s" + buttons[i].getId(), 100),
+                    sharedPref.getFloat("favorites_button_v" + buttons[i].getId(), 0));
+
             buttons[i].setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -166,23 +172,27 @@ public class MainActivity extends AppCompatActivity implements
                     vibrate(50);
 
                     saveColorToFavourites(buttons[i]);
+                    setButtonColor(buttons[i], (float) hValue, (float) sValue, (float) vValue);
 
-                    RoundRectShape rectShape = new RoundRectShape(new float[]{
-                            50, 50, 50, 50,
-                            50, 50, 50, 50
-                    }, null, null);
-                    ShapeDrawable shapeDrawable = new ShapeDrawable(rectShape);
-                    shapeDrawable.getPaint().setColor(Color.HSVToColor(new float[]{(float) hValue, (float) sValue, (float) vValue}));
-                    shapeDrawable.getPaint().setStyle(Paint.Style.FILL);
-                    shapeDrawable.getPaint().setAntiAlias(true);
-                    shapeDrawable.getPaint().setFlags(Paint.ANTI_ALIAS_FLAG);
-
-                    buttons[i].setForeground(shapeDrawable);
 
                     return false;
                 }
             });
         }
+    }
+
+    private void setButtonColor(Button button, float h, float s, float v){
+        RoundRectShape rectShape = new RoundRectShape(new float[]{
+                50, 50, 50, 50,
+                50, 50, 50, 50
+        }, null, null);
+        ShapeDrawable shapeDrawable = new ShapeDrawable(rectShape);
+        shapeDrawable.getPaint().setColor(Color.HSVToColor((int) v,new float[]{ h, s, 100}));
+        shapeDrawable.getPaint().setStyle(Paint.Style.FILL);
+        shapeDrawable.getPaint().setAntiAlias(true);
+        shapeDrawable.getPaint().setFlags(Paint.ANTI_ALIAS_FLAG);
+
+        button.setForeground(shapeDrawable);
     }
 
     private void saveColorToFavourites(Button button) {

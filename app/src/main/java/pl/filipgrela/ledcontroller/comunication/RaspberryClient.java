@@ -49,7 +49,7 @@ public class RaspberryClient {
         this.context = context;
         out = null;
 
-        if (isHostIsReachable(context, ip)) {
+        if (isHostIsReachable(ip)) {
             hostConnectionsTries = 0;
             pref = context.getSharedPreferences("MyPref", Context.MODE_PRIVATE);
             editor = pref.edit();
@@ -142,7 +142,7 @@ public class RaspberryClient {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void sendMessage(Context context, PrintWriter out, String msg) {
         this.context = context;
-        if (isHostIsReachable(context, getPrefServerIp(context)) && out != null) {
+        if (isHostIsReachable(getPrefServerIp(context)) && out != null) {
             Log.d(TAG, "Message send.");
 
             byte[] bytes = msg.getBytes(StandardCharsets.UTF_8);
@@ -177,16 +177,7 @@ public class RaspberryClient {
         Log.d(TAG, "Connection closed.");
     }
 
-
-    public void updateIP(String ip, int port) throws IOException {
-        Log.d(TAG, "Server ip updating to:" + ip + ":" + port);
-
-        editor.putString("Server_IP", ip);
-        editor.putInt("Server_port", port);
-        editor.apply();
-    }
-
-    private boolean isHostIsReachable(Context context, String ip){
+    private boolean isHostIsReachable(String ip){
         boolean reachable = false;
         try {
             InetAddress address = InetAddress.getByName(ip);
@@ -211,6 +202,4 @@ public class RaspberryClient {
 
         return pref.getInt("Server_port", DEFAULT_PORT);
     }
-
-    //TODO Zrobić wysyłanie wiadomości wyłaczającej program na rpi oraz rpi (EXIT_MSG = "Az!DaKYJ,2LvN=]s{R@];4))#Aj-hub<tuP4D+^S8RN,Yb+r_+")
 }
