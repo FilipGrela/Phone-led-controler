@@ -156,10 +156,11 @@ public class MainActivity extends AppCompatActivity implements
             buttons[i].setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    variables.hValue = sharedPref.getFloat("favorites_button_h" + buttons[i].getId(), 180);
-                    variables.sValue = sharedPref.getFloat("favorites_button_s" + buttons[i].getId(), 100);
-                    variables.vValue = sharedPref.getFloat("favorites_button_v" + buttons[i].getId(), 0);
+                    variables.sethValue(sharedPref.getFloat("favorites_button_h" + buttons[i].getId(), 180));
+                    variables.sethValue(sharedPref.getFloat("favorites_button_s" + buttons[i].getId(), 100));
+                    variables.sethValue(sharedPref.getFloat("favorites_button_v" + buttons[i].getId(), 0));
                     updateUI();
+                    vibrate(50);
 
                     raspberryClient.updateLEDColor(getApplicationContext());
 
@@ -169,12 +170,10 @@ public class MainActivity extends AppCompatActivity implements
             buttons[i].setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-                    vibrate(50);
+                    vibrate(150);
 
                     saveColorToFavourites(buttons[i]);
                     setButtonColor(buttons[i], (float) hValue, (float) sValue, (float) vValue);
-
-
                     return false;
                 }
             });
@@ -187,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements
                 50, 50, 50, 50
         }, null, null);
         ShapeDrawable shapeDrawable = new ShapeDrawable(rectShape);
-        shapeDrawable.getPaint().setColor(Color.HSVToColor((int) v,new float[]{ h, s, 100}));
+        shapeDrawable.getPaint().setColor(Color.parseColor(hsvToRgb((float) h, (float) s, (float) v)));
         shapeDrawable.getPaint().setStyle(Paint.Style.FILL);
         shapeDrawable.getPaint().setAntiAlias(true);
         shapeDrawable.getPaint().setFlags(Paint.ANTI_ALIAS_FLAG);
@@ -201,6 +200,73 @@ public class MainActivity extends AppCompatActivity implements
         updatePreferences("favorites_button_v" + button.getId(), (float) vValue);
     }
 
+    public static String hsvToRgb(float H, float S, float V) {
+        float R, G, B;
+
+        H /= 360f;
+        S /= 100f;
+        V /= 100f;
+
+        if (S == 0) {
+            R = V * 255;
+            G = V * 255;
+            B = V * 255;
+        } else {
+            float var_h = H * 6;
+            if (var_h == 6)
+                var_h = 0; // H must be < 1
+            int var_i = (int) Math.floor((double) var_h); // Or ... var_i =
+            // floor( var_h )
+            float var_1 = V * (1 - S);
+            float var_2 = V * (1 - S * (var_h - var_i));
+            float var_3 = V * (1 - S * (1 - (var_h - var_i)));
+
+            float var_r;
+            float var_g;
+            float var_b;
+            if (var_i == 0) {
+                var_r = V;
+                var_g = var_3;
+                var_b = var_1;
+            } else if (var_i == 1) {
+                var_r = var_2;
+                var_g = V;
+                var_b = var_1;
+            } else if (var_i == 2) {
+                var_r = var_1;
+                var_g = V;
+                var_b = var_3;
+            } else if (var_i == 3) {
+                var_r = var_1;
+                var_g = var_2;
+                var_b = V;
+            } else if (var_i == 4) {
+                var_r = var_3;
+                var_g = var_1;
+                var_b = V;
+            } else {
+                var_r = V;
+                var_g = var_1;
+                var_b = var_2;
+            }
+
+            R = var_r * 255; // RGB results from 0 to 255
+            G = var_g * 255;
+            B = var_b * 255;
+        }
+
+        String rs = Integer.toHexString((int) (R));
+        String gs = Integer.toHexString((int) (G));
+        String bs = Integer.toHexString((int) (B));
+
+        if (rs.length() == 1)
+            rs = "0" + rs;
+        if (gs.length() == 1)
+            gs = "0" + gs;
+        if (bs.length() == 1)
+            bs = "0" + bs;
+        return "#" + rs + gs + bs;
+    }
 
 
     @SuppressLint("ClickableViewAccessibility")
@@ -222,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser){
                     hValue = 360.0*((double) progress /100.0);
-                    variables.hValue = hValue;
+                    variables.sethValue(hValue);
                     hSeekBarValue.setText(df.format(hValue));
                 }
             }
@@ -246,7 +312,7 @@ public class MainActivity extends AppCompatActivity implements
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser){
                     sValue = progress;
-                    variables.sValue = sValue;
+                    variables.setsValue(sValue);
                     sSeekBarValue.setText(String.valueOf(sValue));
                 }
             }
@@ -270,7 +336,7 @@ public class MainActivity extends AppCompatActivity implements
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser){
                     vValue = progress;
-                    variables.vValue = vValue;
+                    variables.setvValue(vValue);
                     vSeekBarValue.setText(String.valueOf(vValue));
                 }
             }
@@ -311,7 +377,7 @@ public class MainActivity extends AppCompatActivity implements
                             hSeekBarValue.setText("0");
                         }else{
                             hValue = value;
-                            variables.hValue = hValue;
+                            variables.setvValue(hValue);
                             updateHSVPreferences();
                             hSeekBar.setProgress((int)((int) 100d / 360d *hValue));
                             raspberryClient.updateLEDColor(getApplicationContext());
@@ -346,7 +412,7 @@ public class MainActivity extends AppCompatActivity implements
                             sSeekBarValue.setText("0");
                         }else{
                             sValue = value;
-                            variables.sValue = sValue;
+                            variables.setsValue(sValue);
                             updateHSVPreferences();
                             sSeekBar.setProgress((int) sValue);
                             raspberryClient.updateLEDColor(getApplicationContext());
@@ -380,7 +446,7 @@ public class MainActivity extends AppCompatActivity implements
                             vSeekBarValue.setText("0");
                         }else{
                             vValue = value;
-                            variables.vValue = vValue;
+                            variables.setvValue(vValue);
                             updateHSVPreferences();
                             vSeekBar.setProgress((int) vValue);
                             raspberryClient.updateLEDColor(getApplicationContext());
@@ -397,9 +463,9 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     public void loadPreferencesToVariables(){
-        variables.hValue = sharedPref.getFloat("hValue", 280);
-        variables.sValue = sharedPref.getFloat("sValue", 100);
-        variables.vValue = sharedPref.getFloat("vValue", 35);
+        variables.sethValue(sharedPref.getFloat("hValue", 280));
+        variables.setsValue(sharedPref.getFloat("sValue", 100));
+        variables.setvValue(sharedPref.getFloat("vValue", 35));
 
         Log.d(TAG, "Reading HSV preferences  h:" + variables.hValue + " s:"+ variables.sValue + " v:" + variables.vValue);
     }

@@ -74,7 +74,7 @@ public class RaspberryClient {
             }
         }else{
             hostConnectionsTries++;
-            if(hostConnectionsTries <5){
+            if(hostConnectionsTries < 3){
                 startConnection(context, ip, port);
             }
             hostConnectionsTries = 0;
@@ -86,30 +86,35 @@ public class RaspberryClient {
         Log.d(TAG, "Starting hsv connection");
         //Replace below IP with the IP of that device in which server socket open.
         //If you change port then change the port number in the server side code also.
-        Thread threadConnection = new Thread(() -> {
-            try {
-                //Replace below IP with the IP of that device in which server socket open.
-                //If you change port then change the port number in the server side code also.
-                PrintWriter out;
-                out = startConnection(context);
-                String lastMsg = "";
-                do {
-                    if (!lastMsg.equals("H_VAL" + variables.hValue + "S_VAL" + variables.sValue + "V_VAL" + variables.vValue)) {
-                        lastMsg = "H_VAL" + variables.hValue + "S_VAL" + variables.sValue + "V_VAL" + variables.vValue;
-                        sendMessage(context, out, "H_VAL" + variables.hValue + "S_VAL" + variables.sValue + "V_VAL" + variables.vValue);
-                    }
-                } while (variables.isHSeekBarTouched ^ variables.isSSeekBarTouched ^ variables.isVSeekBarTouched);
-                sendMessage(context, out, "!DISCONNECT");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
-        threadConnection.start();
+        if (variables.hValue != variables.hValueLast || variables.sValue != variables.sValueLast || variables.vValue != variables.vValueLast){
+            Thread threadConnection = new Thread(() -> {
+                try {
+                    //Replace below IP with the IP of that device in which server socket open.
+                    //If you change port then change the port number in the server side code also.
+                    PrintWriter out;
+                    out = startConnection(context);
+                    String lastMsg = "";
+                    do {
+                        if (!lastMsg.equals("H_VAL" + variables.hValue + "S_VAL" + variables.sValue + "V_VAL" + variables.vValue)) {
+                            lastMsg = "H_VAL" + variables.hValue + "S_VAL" + variables.sValue + "V_VAL" + variables.vValue;
+                            sendMessage(context, out, "H_VAL" + variables.hValue + "S_VAL" + variables.sValue + "V_VAL" + variables.vValue);
+                        }
+                    } while (variables.isHSeekBarTouched ^ variables.isSSeekBarTouched ^ variables.isVSeekBarTouched);
+                    sendMessage(context, out, "!DISCONNECT");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            });
+            threadConnection.start();
+        }
     }
 
     public void updateLEDColor(Context context){
+
+        Log.d(TAG, "updateLEDColor");
         Thread thread = new Thread(() -> {
             try {
+                Log.d(TAG, "watek startuje");
                 //Replace below IP with the IP of that device in which server socket open.
                 //If you change port then change the port number in the server side code also.
                 PrintWriter out;
@@ -120,7 +125,9 @@ public class RaspberryClient {
                 e.printStackTrace();
             }
         });
-        thread.start();
+
+        if(!thread.isAlive())
+            thread.start();
     }
 
     public void sendCustomMessage(Context context, String msg){
@@ -181,7 +188,7 @@ public class RaspberryClient {
         boolean reachable = false;
         try {
             InetAddress address = InetAddress.getByName(ip);
-            reachable = address.isReachable(75);
+            reachable = address.isReachable(25);
         } catch (IOException e){
             e.printStackTrace();
         }

@@ -112,20 +112,20 @@
             android:layout_height="wrap_content">
 
             <Button
-                android:background="@drawable/rounded_rectangle"
+                android:background="#00FFFFFF"
                 android:id="@+id/favourite_0"
                 android:layout_width="55dp"
                 android:layout_height="55dp"/>
 
             <Button
-                android:background="@drawable/rounded_rectangle"
+                android:background="#00FFFFFF"
                 android:id="@+id/favourite_1"
                 android:layout_width="55dp"
                 android:layout_height="55dp"
                 android:layout_marginHorizontal="15dp"/>
 
             <Button
-                android:background="@drawable/rounded_rectangle"
+                android:background="#00FFFFFF"
                 android:id="@+id/favourite_2"
                 android:layout_width="55dp"
                 android:layout_height="55dp"/>
@@ -137,20 +137,20 @@
             android:layout_marginTop="5dp">
 
             <Button
-                android:background="@drawable/rounded_rectangle"
+                android:background="#00FFFFFF"
                 android:id="@+id/favourite_3"
                 android:layout_width="55dp"
                 android:layout_height="55dp" />
 
             <Button
-                android:background="@drawable/rounded_rectangle"
+                android:background="#00FFFFFF"
                 android:id="@+id/favourite_4"
                 android:layout_width="55dp"
                 android:layout_height="55dp"
                 android:layout_marginHorizontal="15dp"/>
 
             <Button
-                android:background="@drawable/rounded_rectangle"
+                android:background="#00FFFFFF"
                 android:id="@+id/favourite_5"
                 android:layout_width="55dp"
                 android:layout_height="55dp"/>
