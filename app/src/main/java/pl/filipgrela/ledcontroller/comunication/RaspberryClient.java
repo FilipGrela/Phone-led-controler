@@ -109,24 +109,28 @@ public class RaspberryClient {
         }
     }
 
+    boolean areLEDsUpdating = false;
     public void updateLEDColor(Context context){
 
         Log.d(TAG, "updateLEDColor");
         Thread thread = new Thread(() -> {
+            areLEDsUpdating = true;
             try {
-                Log.d(TAG, "watek startuje");
+                Log.d(TAG, "Thread 'updateLEDColor' starts");
                 //Replace below IP with the IP of that device in which server socket open.
                 //If you change port then change the port number in the server side code also.
                 PrintWriter out;
                 out = startConnection(context);
                 sendMessage(context, out,"H_VAL" + variables.hValue + "S_VAL" + variables.sValue + "V_VAL" + variables.vValue);
                 sendMessage(context, out,"!DISCONNECT");
+                areLEDsUpdating = false;
             } catch (IOException e) {
+                areLEDsUpdating = false;
                 e.printStackTrace();
             }
         });
 
-        if(!thread.isAlive())
+        if(!thread.isAlive() && !areLEDsUpdating)
             thread.start();
     }
 
@@ -162,7 +166,7 @@ public class RaspberryClient {
             msgLengthToSend = String.format("%-" + HEADER + "s", msgLengthToSend);
 
             out.print(msgLengthToSend);
-            Log.d(TAG, "Msg leinht: '" + msgLengthToSend + "'");
+            Log.d(TAG, "Msg length: '" + msgLengthToSend + "'");
             out.flush();
             out.print(msg);
             Log.d(TAG, msg);
