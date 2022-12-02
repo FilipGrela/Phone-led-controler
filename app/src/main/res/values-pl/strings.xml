@@ -23,7 +23,7 @@
     <string name="shutdown_menu">Wyłącz</string>
     <string name="cancel">Anuluj</string>
     <string name="ok">Rozumiem</string>
-    <string name="alertShutdown">You will completely shut down the raspberry pi. To re-enable the program, you will need to connect the power supply again.</string>
+    <string name="alertShutdown">Całkowicie wyłączysz Raspberry Pi. Aby ponownie włączyć program, konieczne będzie ponowne uruchomienie komputera.</string>
     <string name="attention">Uwaga!</string>
     <string name="alertOffProgram">Wyłacz program</string>
     <string name="switch_preference_dark_theme">Ciemny motyw</string>

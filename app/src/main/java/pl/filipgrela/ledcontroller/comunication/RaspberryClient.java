@@ -23,7 +23,7 @@ public class RaspberryClient {
 
     private static final String TAG = "RaspberryClient";
 
-    private final String DEFAULT_IP = "192.168.8.137";
+    private final String DEFAULT_IP = "192.168.1.22";
     private final int DEFAULT_PORT = 6061;
     private final int HEADER = 8;
 

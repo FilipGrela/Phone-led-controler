@@ -110,15 +110,12 @@ public class MainActivity extends AppCompatActivity implements
         sSeekBarValue = findViewById(R.id.SSeekbarValue);
         vSeekBarValue = findViewById(R.id.VSeekbarValue);
 
-
         buttons[0] = findViewById(R.id.favourite_0);
         buttons[1] = findViewById(R.id.favourite_1);
         buttons[2] = findViewById(R.id.favourite_2);
         buttons[3] = findViewById(R.id.favourite_3);
         buttons[4] = findViewById(R.id.favourite_4);
         buttons[5] = findViewById(R.id.favourite_5);
-
-
 
         updateUI();
         setupKeyboardHide();
@@ -127,7 +124,6 @@ public class MainActivity extends AppCompatActivity implements
         setupFavouriteColors();
 
         raspberryClient.updateLEDColor(getApplicationContext());
-
     }
 
     private void updateUI() {
@@ -144,6 +140,198 @@ public class MainActivity extends AppCompatActivity implements
         vSeekBar.setProgress((int) (vValue));
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    private void setupKeyboardHide(){
+        linearLayout.setOnTouchListener((v, event) -> {
+            InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(linearLayout.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
+
+            hSeekBarValue.clearFocus();
+            sSeekBarValue.clearFocus();
+            vSeekBarValue.clearFocus();
+            return true;
+        });
+    }
+
+    private void setupSeekBars(){
+        hSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser){
+                    hValue = 360.0*((double) progress /100.0);
+                    variables.sethValue(hValue);
+                    hSeekBarValue.setText(df.format(hValue));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                vibrate(50);
+                variables.isHSeekBarTouched = true;
+                raspberryClient.startHSVConnection(getApplicationContext());
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                variables.isHSeekBarTouched = false;
+                updateHSVPreferences();
+            }
+        });
+
+        sSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser){
+                    sValue = progress;
+                    variables.setsValue(sValue);
+                    sSeekBarValue.setText(String.valueOf(sValue));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                vibrate(50);
+                variables.isSSeekBarTouched = true;
+                raspberryClient.startHSVConnection(getApplicationContext());
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                variables.isSSeekBarTouched = false;
+                updateHSVPreferences();
+            }
+        });
+
+        vSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser){
+                    vValue = progress;
+                    variables.setvValue(vValue);
+                    vSeekBarValue.setText(String.valueOf(vValue));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                vibrate(50);
+                variables.isVSeekBarTouched = true;
+                raspberryClient.startHSVConnection(getApplicationContext());
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                variables.isVSeekBarTouched = false;
+                updateHSVPreferences();
+            }
+        });
+    }
+    private void setupEditText(){
+
+        hSeekBarValue.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(s != null || !s.toString().isEmpty()) {
+                    if(!variables.isHSeekBarTouched){
+                        double value = ((!s.toString().equals("") && !s.toString().equals("."))? Double.parseDouble(String.valueOf(s)) : 0);
+                        if(value > 360){
+                            makeToast(getResources().getString(R.string.toast_h_over_range) + "!");
+                            hSeekBarValue.setText("360");
+                        }else if(value < 0){
+                            makeToast(getResources().getString(R.string.toast_h_under_range) + "!");
+                            hSeekBarValue.setText("0");
+                        }else{
+                            hValue = value;
+                            variables.setvValue(hValue);
+                            updateHSVPreferences();
+                            hSeekBar.setProgress((int)((int) 100d / 360d *hValue));
+                            raspberryClient.updateLEDColor(getApplicationContext());
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        sSeekBarValue.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if(s != null || !s.toString().isEmpty()) {
+                    if(!variables.isSSeekBarTouched){
+                        Log.d(TAG, "string empty\"" + s + "\"");
+                        double value = ((!s.toString().equals("") && !s.toString().equals("."))? Double.parseDouble(String.valueOf(s)) : 0);
+                        if(value > 100){
+                            makeToast(getResources().getString(R.string.toast_s_over_range) + "!");
+                            sSeekBarValue.setText("100");
+                        }else if(value < 0){
+                            makeToast(getResources().getString(R.string.toast_s_under_range) + "!");
+                            sSeekBarValue.setText("0");
+                        }else{
+                            sValue = value;
+                            variables.setsValue(sValue);
+                            updateHSVPreferences();
+                            sSeekBar.setProgress((int) sValue);
+                            raspberryClient.updateLEDColor(getApplicationContext());
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        vSeekBarValue.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if(s != null || !s.toString().isEmpty() ^ !variables.isVSeekBarTouched) {
+                    if(!variables.isVSeekBarTouched){
+                        double value = ((!s.toString().equals("") && !s.toString().equals("."))? Double.parseDouble(String.valueOf(s)) : 0);
+                        if(value > 100){
+                            makeToast(getResources().getString(R.string.toast_v_over_range) + "!");
+                            vSeekBarValue.setText("100");
+                        }else if(value < 0){
+                            makeToast(getResources().getString(R.string.toast_v_under_range) + "!");
+                            vSeekBarValue.setText("0");
+                        }else{
+                            vValue = value;
+                            variables.setvValue(vValue);
+                            updateHSVPreferences();
+                            vSeekBar.setProgress((int) vValue);
+                            raspberryClient.updateLEDColor(getApplicationContext());
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+    }
+
     private void setupFavouriteColors() {
         for (int j = 0; j <= buttons.length - 1; j++){
             final int i = j;
@@ -157,8 +345,8 @@ public class MainActivity extends AppCompatActivity implements
                 @Override
                 public void onClick(View v) {
                     variables.sethValue(sharedPref.getFloat("favorites_button_h" + buttons[i].getId(), 180));
-                    variables.sethValue(sharedPref.getFloat("favorites_button_s" + buttons[i].getId(), 100));
-                    variables.sethValue(sharedPref.getFloat("favorites_button_v" + buttons[i].getId(), 0));
+                    variables.setsValue(sharedPref.getFloat("favorites_button_s" + buttons[i].getId(), 100));
+                    variables.setvValue(sharedPref.getFloat("favorites_button_v" + buttons[i].getId(), 0));
                     updateUI();
                     vibrate(50);
 
@@ -266,200 +454,6 @@ public class MainActivity extends AppCompatActivity implements
         if (bs.length() == 1)
             bs = "0" + bs;
         return "#" + rs + gs + bs;
-    }
-
-
-    @SuppressLint("ClickableViewAccessibility")
-    private void setupKeyboardHide(){
-        linearLayout.setOnTouchListener((v, event) -> {
-            InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(linearLayout.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
-
-            hSeekBarValue.clearFocus();
-            sSeekBarValue.clearFocus();
-            vSeekBarValue.clearFocus();
-            return true;
-        });
-    }
-
-    private void setupSeekBars(){
-        hSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser){
-                    hValue = 360.0*((double) progress /100.0);
-                    variables.sethValue(hValue);
-                    hSeekBarValue.setText(df.format(hValue));
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                vibrate(50);
-                variables.isHSeekBarTouched = true;
-                raspberryClient.startHSVConnection(getApplicationContext());
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                variables.isHSeekBarTouched = false;
-                updateHSVPreferences();
-            }
-        });
-
-        sSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser){
-                    sValue = progress;
-                    variables.setsValue(sValue);
-                    sSeekBarValue.setText(String.valueOf(sValue));
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                vibrate(50);
-                variables.isSSeekBarTouched = true;
-                raspberryClient.startHSVConnection(getApplicationContext());
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                variables.isSSeekBarTouched = false;
-                updateHSVPreferences();
-            }
-        });
-
-        vSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser){
-                    vValue = progress;
-                    variables.setvValue(vValue);
-                    vSeekBarValue.setText(String.valueOf(vValue));
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                vibrate(50);
-                variables.isVSeekBarTouched = true;
-                raspberryClient.startHSVConnection(getApplicationContext());
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                variables.isVSeekBarTouched = false;
-                updateHSVPreferences();
-            }
-        });
-    }
-
-    private void setupEditText(){
-
-        hSeekBarValue.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(s != null || !s.toString().isEmpty()) {
-                    if(!variables.isHSeekBarTouched){
-                        double value = ((!s.toString().equals("") && !s.toString().equals("."))? Double.parseDouble(String.valueOf(s)) : 0);
-                        if(value > 360){
-                            makeToast(getResources().getString(R.string.toast_h_over_range) + "!");
-                            hSeekBarValue.setText("360");
-                        }else if(value < 0){
-                            makeToast(getResources().getString(R.string.toast_h_under_range) + "!");
-                            hSeekBarValue.setText("0");
-                        }else{
-                            hValue = value;
-                            variables.setvValue(hValue);
-                            updateHSVPreferences();
-                            hSeekBar.setProgress((int)((int) 100d / 360d *hValue));
-                            raspberryClient.updateLEDColor(getApplicationContext());
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-
-        sSeekBarValue.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                if(s != null || !s.toString().isEmpty()) {
-                    if(!variables.isSSeekBarTouched){
-                        Log.d(TAG, "string empty\"" + s + "\"");
-                        double value = ((!s.toString().equals("") && !s.toString().equals("."))? Double.parseDouble(String.valueOf(s)) : 0);
-                        if(value > 100){
-                            makeToast(getResources().getString(R.string.toast_s_over_range) + "!");
-                            sSeekBarValue.setText("100");
-                        }else if(value < 0){
-                            makeToast(getResources().getString(R.string.toast_s_under_range) + "!");
-                            sSeekBarValue.setText("0");
-                        }else{
-                            sValue = value;
-                            variables.setsValue(sValue);
-                            updateHSVPreferences();
-                            sSeekBar.setProgress((int) sValue);
-                            raspberryClient.updateLEDColor(getApplicationContext());
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-
-        vSeekBarValue.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                if(s != null || !s.toString().isEmpty() ^ !variables.isVSeekBarTouched) {
-                    if(!variables.isVSeekBarTouched){
-                        double value = ((!s.toString().equals("") && !s.toString().equals("."))? Double.parseDouble(String.valueOf(s)) : 0);
-                        if(value > 100){
-                            makeToast(getResources().getString(R.string.toast_v_over_range) + "!");
-                            vSeekBarValue.setText("100");
-                        }else if(value < 0){
-                            makeToast(getResources().getString(R.string.toast_v_under_range) + "!");
-                            vSeekBarValue.setText("0");
-                        }else{
-                            vValue = value;
-                            variables.setvValue(vValue);
-                            updateHSVPreferences();
-                            vSeekBar.setProgress((int) vValue);
-                            raspberryClient.updateLEDColor(getApplicationContext());
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
     }
 
     public void loadPreferencesToVariables(){
