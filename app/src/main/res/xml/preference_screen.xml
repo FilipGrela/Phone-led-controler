@@ -16,7 +16,7 @@
             android:summary="@string/edit_text_preference_ip_dialog_summary"
             android:icon="@drawable/ic_ip_icon"
             android:dialogMessage="@string/edit_text_preference_ip_dialog_message"
-            android:defaultValue="192.168.8.137" />
+            android:defaultValue="192.168.1.22" />
 
         <EditTextPreference
             android:key="server_port"
