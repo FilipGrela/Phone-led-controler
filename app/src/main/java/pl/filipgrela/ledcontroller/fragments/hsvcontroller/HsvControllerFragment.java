@@ -25,26 +25,21 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationBarView;
-
 import java.text.DecimalFormat;
+import java.util.Objects;
 
 import pl.filipgrela.ledcontroller.R;
 import pl.filipgrela.ledcontroller.Variables;
 import pl.filipgrela.ledcontroller.comunication.RaspberryClient;
-import pl.filipgrela.ledcontroller.fragments.home.HomeFragment;
 import pl.filipgrela.ledcontroller.settings.SettingsActivity;
 
 public class HsvControllerFragment extends Fragment {
@@ -93,7 +88,7 @@ public class HsvControllerFragment extends Fragment {
 
         AppCompatDelegate.setDefaultNightMode(isDarkModeDisabled ? AppCompatDelegate.MODE_NIGHT_NO : AppCompatDelegate.MODE_NIGHT_YES);
 
-        sharedPref = getContext().getSharedPreferences("hssssss", Context.MODE_PRIVATE);
+        sharedPref = Objects.requireNonNull(getContext()).getSharedPreferences("hssssss", Context.MODE_PRIVATE);
         loadPreferencesToVariables();
         hValue = variables.hValue;
         sValue = variables.sValue;
@@ -120,7 +115,7 @@ public class HsvControllerFragment extends Fragment {
         buttons[5] = view.findViewById(R.id.favourite_5);
 
 
-        vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator = (Vibrator) Objects.requireNonNull(getActivity()).getSystemService(Context.VIBRATOR_SERVICE);
 
         updateUI();
         setupKeyboardHide();
@@ -149,7 +144,7 @@ public class HsvControllerFragment extends Fragment {
     @SuppressLint("ClickableViewAccessibility")
     private void setupKeyboardHide(){
         relativeLayout.setOnTouchListener((v, event) -> {
-            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+            InputMethodManager imm = (InputMethodManager) Objects.requireNonNull(getActivity()).getSystemService(
                     Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(relativeLayout.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
 
@@ -161,11 +156,12 @@ public class HsvControllerFragment extends Fragment {
     }
 
     private void setupSeekBars(){
+        hSeekBar.setMax(360);
         hSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser){
-                    hValue = 360.0*((double) progress /100.0);
+                    hValue = progress;
                     variables.sethValue(hValue);
                     hSeekBarValue.setText(df.format(hValue));
                 }
@@ -244,15 +240,13 @@ public class HsvControllerFragment extends Fragment {
             @SuppressLint("SetTextI18n")
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(s != null || !s.toString().isEmpty()) {
+                if(s != null || !Objects.requireNonNull(s).toString().isEmpty()) {
                     if(!variables.isHSeekBarTouched){
                         double value = ((!s.toString().equals("") && !s.toString().equals("."))? Double.parseDouble(String.valueOf(s)) : 0);
                         if(value > 360){
                             makeToast(getResources().getString(R.string.toast_h_over_range) + "!");
-                            hSeekBarValue.setText("360");
                         }else if(value < 0){
                             makeToast(getResources().getString(R.string.toast_h_under_range) + "!");
-                            hSeekBarValue.setText("0");
                         }else{
                             hValue = value;
                             variables.setvValue(hValue);
@@ -278,16 +272,14 @@ public class HsvControllerFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                if(s != null || !s.toString().isEmpty()) {
+                if(s != null || !Objects.requireNonNull(s).toString().isEmpty()) {
                     if(!variables.isSSeekBarTouched){
                         Log.d(TAG, "string empty\"" + s + "\"");
                         double value = ((!s.toString().equals("") && !s.toString().equals("."))? Double.parseDouble(String.valueOf(s)) : 0);
                         if(value > 100){
                             makeToast(getResources().getString(R.string.toast_s_over_range) + "!");
-                            sSeekBarValue.setText("100");
                         }else if(value < 0){
                             makeToast(getResources().getString(R.string.toast_s_under_range) + "!");
-                            sSeekBarValue.setText("0");
                         }else{
                             sValue = value;
                             variables.setsValue(sValue);
@@ -313,15 +305,13 @@ public class HsvControllerFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
 
-                if(s != null || !s.toString().isEmpty() ^ !variables.isVSeekBarTouched) {
+                if(s != null || !Objects.requireNonNull(s).toString().isEmpty() ^ !variables.isVSeekBarTouched) {
                     if(!variables.isVSeekBarTouched){
                         double value = ((!s.toString().equals("") && !s.toString().equals("."))? Double.parseDouble(String.valueOf(s)) : 0);
                         if(value > 100){
                             makeToast(getResources().getString(R.string.toast_v_over_range) + "!");
-                            vSeekBarValue.setText("100");
                         }else if(value < 0){
                             makeToast(getResources().getString(R.string.toast_v_under_range) + "!");
-                            vSeekBarValue.setText("0");
                         }else{
                             vValue = value;
                             variables.setvValue(vValue);
@@ -349,29 +339,23 @@ public class HsvControllerFragment extends Fragment {
                     sharedPref.getFloat("favorites_button_s" + buttons[i].getId(), 100),
                     sharedPref.getFloat("favorites_button_v" + buttons[i].getId(), 0));
 
-            buttons[i].setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    variables.sethValue(sharedPref.getFloat("favorites_button_h" + buttons[i].getId(), 180));
-                    variables.setsValue(sharedPref.getFloat("favorites_button_s" + buttons[i].getId(), 100));
-                    variables.setvValue(sharedPref.getFloat("favorites_button_v" + buttons[i].getId(), 0));
-                    updateUI();
-                    vibrate(50);
+            buttons[i].setOnClickListener(v -> {
+                variables.sethValue(sharedPref.getFloat("favorites_button_h" + buttons[i].getId(), 180));
+                variables.setsValue(sharedPref.getFloat("favorites_button_s" + buttons[i].getId(), 100));
+                variables.setvValue(sharedPref.getFloat("favorites_button_v" + buttons[i].getId(), 0));
+                updateUI();
+                vibrate(50);
 
-                    raspberryClient.updateLEDColor(getContext());
+                raspberryClient.updateLEDColor(getContext());
 
-                }
             });
 
-            buttons[i].setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    vibrate(150);
+            buttons[i].setOnLongClickListener(v -> {
+                vibrate(150);
 
-                    saveColorToFavourites(buttons[i]);
-                    setButtonColor(buttons[i], (float) hValue, (float) sValue, (float) vValue);
-                    return false;
-                }
+                saveColorToFavourites(buttons[i]);
+                setButtonColor(buttons[i], (float) hValue, (float) sValue, (float) vValue);
+                return false;
             });
         }
     }

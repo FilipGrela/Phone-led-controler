@@ -150,7 +150,6 @@ public class RaspberryClient {
         thread.start();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void sendMessage(Context context, PrintWriter out, String msg) {
         this.context = context;
         if (isHostIsReachable(getPrefServerIp(context)) && out != null) {

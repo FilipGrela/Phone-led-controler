@@ -3,7 +3,6 @@
     <string name="app_name">Led controller</string>
     <string name="pref_title">Color picker</string>
     <string name="action_menu">Settings</string>
-    <string name="edit_text_preference_ip_summary" translatable="false">Current ip address</string>
     <string name="edit_text_preference_port_summary">The virtual port</string>
     <string name="toast_h_over_range">Max value for H is 360</string>
     <string name="toast_h_under_range">Min value for H is 0</string>
@@ -22,7 +21,7 @@
     <string name="edit_text_preference_port_dialog_message">Enter the port on which the socket was running in the field below, you can find it in the code on the Raspberry Pi. Default 6061.</string>
     <string name="shutdown_menu">Shutdown</string>
     <string name="cancel">Cancel</string>
-    <string name="ok">Ok</string>
+    <string name="ok">OK</string>
     <string name="alertShutdown">You will completely shut down the raspberry pi. To re-enable the program, you will need to connect the power supply again.</string>
     <string name="attention">Attention!</string>
     <string name="alertOffProgram">Disable program</string>

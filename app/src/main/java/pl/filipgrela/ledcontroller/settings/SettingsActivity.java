@@ -3,9 +3,7 @@ package pl.filipgrela.ledcontroller.settings;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import pl.filipgrela.ledcontroller.R;
 

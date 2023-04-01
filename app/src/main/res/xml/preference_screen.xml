@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
@@ -38,7 +37,18 @@
             android:dialogTitle="@string/switch_preference_dark_theme_dialog_title"
             android:icon="@drawable/ic_theme"
             android:dialogMessage="@string/switch_preference_dark_theme_dialog_message"
+            />
+    </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="Led settings">
+        <ListPreference
+            android:key="ledType"
+            android:title="Choose your led density"
+            android:summary="Choose the right LED density for a better experience"
+            android:icon="@drawable/ic_theme"
+            android:entries="@array/LedTypes"
+            android:entryValues="@array/LedTypesValues"
             />
     </PreferenceCategory>
 

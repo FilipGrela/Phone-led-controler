@@ -3,7 +3,6 @@
     <string name="app_name">Led controller</string>
     <string name="pref_title">Narzędzie do wybierania kolorów</string>
     <string name="action_menu">Ustawienia</string>
-    <string name="edit_text_preference_ip_summary" translatable="false">Aktualny adres ip</string>
     <string name="edit_text_preference_port_summary">Altualny port</string>
     <string name="toast_h_over_range">Maksymalna wartość dla H to 360</string>
     <string name="toast_h_under_range">Minimalna wartość dla H to 0</string>

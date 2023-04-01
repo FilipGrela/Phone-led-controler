@@ -1,10 +1,8 @@
 package pl.filipgrela.ledcontroller;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -17,15 +15,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import pl.filipgrela.ledcontroller.fragments.home.HomeFragment;
-import pl.filipgrela.ledcontroller.fragments.hsvcontroller.HsvControllerFragment;
 import pl.filipgrela.ledcontroller.settings.SettingsActivity;
 import pl.filipgrela.ledcontroller.settings.ShutdownDialog;
 
 import static android.widget.Toast.LENGTH_LONG;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.navigation.NavigationBarView;
 
 public class MainActivity extends AppCompatActivity{
     private final String TAG = "MainActivity";
@@ -36,13 +31,14 @@ public class MainActivity extends AppCompatActivity{
     BottomNavigationView bottomNavigationView;
     NavController navController;
 
-    boolean isDarkModeDisabled = Boolean.parseBoolean(String.valueOf(AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_NO));
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        boolean isDarkModeEnabled = Boolean.parseBoolean(String.valueOf(AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES));
+        AppCompatDelegate.setDefaultNightMode(isDarkModeEnabled ? AppCompatDelegate.MODE_NIGHT_NO : AppCompatDelegate.MODE_NIGHT_YES);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        AppCompatDelegate.setDefaultNightMode(isDarkModeDisabled ? AppCompatDelegate.MODE_NIGHT_NO : AppCompatDelegate.MODE_NIGHT_YES);
 
 
         bottomNavigationView = findViewById(R.id.bottom_navigation);
