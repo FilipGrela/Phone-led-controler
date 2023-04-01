@@ -88,7 +88,7 @@ public class HsvControllerFragment extends Fragment {
 
         AppCompatDelegate.setDefaultNightMode(isDarkModeDisabled ? AppCompatDelegate.MODE_NIGHT_NO : AppCompatDelegate.MODE_NIGHT_YES);
 
-        sharedPref = Objects.requireNonNull(getContext()).getSharedPreferences("hssssss", Context.MODE_PRIVATE);
+        sharedPref = requireContext().getSharedPreferences("hssssss", Context.MODE_PRIVATE);
         loadPreferencesToVariables();
         hValue = variables.hValue;
         sValue = variables.sValue;
@@ -115,7 +115,7 @@ public class HsvControllerFragment extends Fragment {
         buttons[5] = view.findViewById(R.id.favourite_5);
 
 
-        vibrator = (Vibrator) Objects.requireNonNull(getActivity()).getSystemService(Context.VIBRATOR_SERVICE);
+        vibrator = (Vibrator) requireActivity().getSystemService(Context.VIBRATOR_SERVICE);
 
         updateUI();
         setupKeyboardHide();
@@ -144,7 +144,7 @@ public class HsvControllerFragment extends Fragment {
     @SuppressLint("ClickableViewAccessibility")
     private void setupKeyboardHide(){
         relativeLayout.setOnTouchListener((v, event) -> {
-            InputMethodManager imm = (InputMethodManager) Objects.requireNonNull(getActivity()).getSystemService(
+            InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(
                     Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(relativeLayout.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
 

@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.InputType;
+import android.text.method.DigitsKeyListener;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -28,7 +30,9 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
     SwitchPreference darkTheme;
 
-    ListPreference ledType;
+    ListPreference listPreferenceDensity;
+
+    EditTextPreference editTextPreferenceAmount;
 
 
     private SharedPreferences.Editor editor;
@@ -48,6 +52,12 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
         editTextPreferenceIp = findPreference("server_ip");
         Objects.requireNonNull(editTextPreferenceIp).setSummary(getResources().getString(R.string.edit_text_preference_ip_summary) + ": " + pref.getString("Server_IP", "192.168.8.137"));
+
+        Objects.requireNonNull(editTextPreferenceIp).setOnBindEditTextListener(editText -> {
+            editText.setInputType(InputType.TYPE_CLASS_NUMBER );
+            editText.setKeyListener(DigitsKeyListener.getInstance("0123456789."));
+        });
+
         editTextPreferenceIp.setOnPreferenceChangeListener((preference, newValue) -> {
             editor.putString("Server_IP", String.valueOf(newValue));
             editor.apply();
@@ -60,7 +70,12 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
 
         editTextPreferencePort = findPreference("server_port");
-        Objects.requireNonNull(editTextPreferencePort).setSummary(getResources().getString(R.string.edit_text_preference_port_summary) + ": " + pref.getInt("Server_port", 6061));
+        Objects.requireNonNull(editTextPreferencePort).setOnBindEditTextListener(editText ->
+                editText.setInputType(InputType.TYPE_CLASS_NUMBER)
+        );
+        Objects.requireNonNull(editTextPreferencePort).setSummary(
+                getResources().getString(R.string.edit_text_preference_port_summary) + ": " + pref.getInt("Server_port", 6061)
+        );
         editTextPreferencePort.setOnPreferenceChangeListener((preference, newValue) -> {
             editor.putInt("Server_port", Integer.parseInt(String.valueOf(newValue)));
             editor.apply();
@@ -68,6 +83,34 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             editTextPreferencePort.setText(String.valueOf(pref.getInt("Server_port", 6061)));
             editTextPreferencePort.setSummary(getResources().getString(R.string.edit_text_preference_port_summary) + ": " + pref.getInt("Server_port", 6061));
             makeToast(getResources().getString(R.string.edit_text_preference_port_summary) + ": " + pref.getInt("Server_port", 6061));
+            return true;
+        });
+
+        listPreferenceDensity = findPreference("ledDensity");
+        listPreferenceDensity.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
+                editor.putInt("ledDensity", Integer.parseInt(String.valueOf(newValue)));
+                editor.apply();
+
+                Log.d(TAG, "Value: " + newValue);
+                makeToast("You've selected " + getResources().getStringArray(R.array.LedTypes) [Integer.parseInt(String.valueOf(newValue))]);
+
+                return true;
+            }
+        });
+
+        editTextPreferenceAmount = findPreference("ledAmount");
+        Objects.requireNonNull(editTextPreferenceAmount).setOnBindEditTextListener(
+                editText -> editText.setInputType(InputType.TYPE_CLASS_NUMBER)
+        );
+        editTextPreferenceAmount.setOnPreferenceChangeListener((preference, newValue) -> {
+            editor.putInt("led_amount", Integer.parseInt(String.valueOf(newValue)));
+            editor.apply();
+
+            editTextPreferenceAmount.setText(String.valueOf(pref.getInt("led_amount", 300)));
+            editTextPreferenceAmount.setSummary("LED amount" + ": " + pref.getInt("led_amount", 300) + " diodes");
+            makeToast("LED amount" + ": " + pref.getInt("led_amount", 300) + " diodes");
             return true;
         });
 
@@ -84,20 +127,6 @@ public class SettingsFragment extends PreferenceFragmentCompat {
 
             Log.d(TAG, ((isDarkModeEnabled) ? "Disable" : "Enable") + " Dark Mode");
             return true;
-        });
-
-        ledType = findPreference("ledType");
-        ledType.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
-                editor.putInt("ledType", Integer.parseInt(String.valueOf(newValue)));
-                editor.apply();
-
-                Log.d(TAG, "Value: " + newValue);
-                makeToast("You've selected " + getResources().getStringArray(R.array.LedTypes) [Integer.parseInt(String.valueOf(newValue))]);
-
-                return true;
-            }
         });
 
         //TODO ręczna zmianę jezyka

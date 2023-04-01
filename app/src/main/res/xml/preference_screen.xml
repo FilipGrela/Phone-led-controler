@@ -15,7 +15,8 @@
             android:summary="@string/edit_text_preference_ip_dialog_summary"
             android:icon="@drawable/ic_ip_icon"
             android:dialogMessage="@string/edit_text_preference_ip_dialog_message"
-            android:defaultValue="192.168.1.22" />
+            android:defaultValue="192.168.1.22"
+            />
 
         <EditTextPreference
             android:key="server_port"
@@ -25,7 +26,8 @@
             android:summary="@string/edit_text_preference_port_dialog_summary"
             android:icon="@drawable/ic_port_icon"
             android:dialogMessage="@string/edit_text_preference_port_dialog_message"
-            android:defaultValue="6061" />
+            android:defaultValue="6061"
+            />
     </PreferenceCategory>
 
     <PreferenceCategory
@@ -43,13 +45,23 @@
     <PreferenceCategory
         android:title="Led settings">
         <ListPreference
-            android:key="ledType"
+            android:key="ledDensity"
             android:title="Choose your led density"
             android:summary="Choose the right LED density for a better experience"
-            android:icon="@drawable/ic_theme"
+            android:icon="@drawable/density"
             android:entries="@array/LedTypes"
             android:entryValues="@array/LedTypesValues"
+            android:defaultValue="3"
             />
+
+        <EditTextPreference
+            android:key="ledAmount"
+            android:title="Select how many LEDs you have"
+            android:summary="Enter the number of LEDs you have."
+            android:icon="@drawable/led_light"
+            android:defaultValue="300"
+            android:dialogTitle="Enter the number of diodes."
+        />
     </PreferenceCategory>
 
 </PreferenceScreen>

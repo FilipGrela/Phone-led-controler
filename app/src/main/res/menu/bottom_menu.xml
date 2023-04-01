@@ -2,16 +2,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
 
-    <item android:id="@+id/homeFragment"
-        android:title="Home"
-        android:icon="@drawable/ic_ip_icon"
-        />
+<!--    <item android:id="@+id/homeFragment"-->
+<!--        android:title="Lighting"-->
+<!--        android:icon="@drawable/brightness"-->
+<!--        />-->
     <item android:id="@+id/hsvControllerFragment"
         android:title="HSV"
-        android:icon="@drawable/shut_down"
+        android:icon="@drawable/slider"
         />
-    <item android:id="@+id/fragmentTest"
-        android:title="Test"
-        android:icon="@drawable/ic_port_icon"
-        />
+<!--    <item android:id="@+id/fragmentTest"-->
+<!--        android:title="test"-->
+<!--        android:icon="@drawable/shut_down"-->
+<!--        />-->
 </menu>
